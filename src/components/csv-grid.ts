@@ -1,6 +1,7 @@
 class CSVGrid extends HTMLElement {
-  private data: string[][] = [];
-  private filteredData: string[][] = [];
+  private data: any[] = [];
+  private filteredData: any[] = [];
+  private headers: string[] = [];
   private sortDirection: number = 1;
   private sortColumn: number = -1;
   private currentPage: number = 1;
@@ -178,7 +179,7 @@ class CSVGrid extends HTMLElement {
 
   attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
     if (name === 'data-src' && newValue) {
-      void this.loadCSV(newValue);
+      void this.loadData(newValue);
     } else if (name === 'rows-per-page' && newValue) {
       const rows = parseInt(newValue, 10);
       if (!isNaN(rows) && rows > 0) {
@@ -200,7 +201,7 @@ class CSVGrid extends HTMLElement {
       }
     }
     if (src) {
-      void this.loadCSV(src);
+      void this.loadData(src);
     }
     const shadow = this.shadowRoot;
     if (shadow) {
@@ -212,7 +213,7 @@ class CSVGrid extends HTMLElement {
         }
       });
       shadow.querySelector('.next')?.addEventListener('click', () => {
-        const totalPages = Math.ceil((this.filteredData.length - 1) / this.rowsPerPage);
+        const totalPages = Math.ceil(this.filteredData.length / this.rowsPerPage);
         if (this.currentPage < totalPages) {
           this.currentPage++;
           this.renderTable();
@@ -251,7 +252,7 @@ class CSVGrid extends HTMLElement {
     }
   }
 
-  private async loadCSV(url: string): Promise<void> {
+  private async loadData(url: string): Promise<void> {
     try {
       const tbody = this.shadowRoot?.querySelector('tbody');
       if (tbody) {
@@ -261,9 +262,13 @@ class CSVGrid extends HTMLElement {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const text = await response.text();
-      this.data = this.parseCSV(text);
-      this.filteredData = [...this.data]; // Initialize filtered data
+      const json = await response.json();
+      if (!Array.isArray(json) || json.length === 0) {
+        throw new Error('Invalid JSON data');
+      }
+      this.headers = Object.keys(json[0]);
+      this.data = json;
+      this.filteredData = [...json];
       this.currentPage = 1;
       this.renderTable();
       this.updatePaginationControls();
@@ -276,42 +281,34 @@ class CSVGrid extends HTMLElement {
     }
   }
 
-  private parseCSV(csvText: string): string[][] {
-    return csvText
-      .trim()
-      .split('\n')
-      .map(row => row.split(',').map(cell => cell.trim()));
-  }
-
   private applyFilter(): void {
     if (!this.searchQuery) {
       this.filteredData = [...this.data];
       return;
     }
-    const header = this.data[0] ?? [];
-    this.filteredData = [header, ...this.data.slice(1).filter(row =>
-      row.some(cell => cell.toLowerCase().includes(this.searchQuery))
-    )];
+    this.filteredData = this.data.filter(row =>
+      Object.values(row).some(cell =>
+        String(cell).toLowerCase().includes(this.searchQuery)
+      )
+    );
   }
 
   private renderTable(): void {
-    const headers = this.filteredData[0] ?? [];
-    const body = this.filteredData.slice(1) ?? [];
     const startIndex = (this.currentPage - 1) * this.rowsPerPage;
     const endIndex = startIndex + this.rowsPerPage;
-    const paginatedBody = body.slice(startIndex, endIndex);
+    const paginatedData = this.filteredData.slice(startIndex, endIndex);
     const thead = this.shadowRoot?.querySelector('thead');
     const tbody = this.shadowRoot?.querySelector('tbody');
     if (thead && tbody) {
       thead.innerHTML = `
         <tr>
-          ${headers.map((h, i) => `<th role="columnheader" class="${i === this.sortColumn ? (this.sortDirection > 0 ? 'sort-ascending' : 'sort-descending') : 'sort-indicator'}">${h}</th>`).join('')}
+          ${this.headers.map((h, i) => `<th role="columnheader" class="${i === this.sortColumn ? (this.sortDirection > 0 ? 'sort-ascending' : 'sort-descending') : 'sort-indicator'}">${h}</th>`).join('')}
         </tr>
       `;
       tbody.innerHTML = `
-        ${paginatedBody.map(row => `
+        ${paginatedData.map(row => `
           <tr role="row">
-            ${row.map(cell => `<td role="gridcell" class="message-bubble">${cell}</td>`).join('')}
+            ${this.headers.map(h => `<td role="gridcell" class="message-bubble">${row[h] ?? ''}</td>`).join('')}
           </tr>
         `).join('')}
       `;
@@ -319,7 +316,7 @@ class CSVGrid extends HTMLElement {
   }
 
   private updatePaginationControls(): void {
-    const totalRows = this.filteredData.length - 1; // Exclude header
+    const totalRows = this.filteredData.length;
     const totalPages = Math.ceil(totalRows / this.rowsPerPage);
     const shadow = this.shadowRoot;
     if (shadow) {
@@ -343,19 +340,18 @@ class CSVGrid extends HTMLElement {
     }
     this.sortColumn = columnIndex;
 
-    const body = this.filteredData.slice(1);
+    const columnKey = this.headers[columnIndex];
     const isNumeric = this.isColumnNumeric(columnIndex);
 
-    body.sort((rowA, rowB) => {
-      const cellA = rowA[columnIndex]?.trim() ?? '';
-      const cellB = rowB[columnIndex]?.trim() ?? '';
+    this.filteredData.sort((rowA, rowB) => {
+      const cellA = String(rowA[columnKey] ?? '').trim();
+      const cellB = String(rowB[columnKey] ?? '').trim();
       if (isNumeric) {
         return (Number(cellA) - Number(cellB)) * this.sortDirection;
       }
       return cellA.localeCompare(cellB) * this.sortDirection;
     });
 
-    this.filteredData = [this.filteredData[0], ...body];
     this.currentPage = 1;
     this.renderTable();
     this.updatePaginationControls();
@@ -374,10 +370,10 @@ class CSVGrid extends HTMLElement {
   }
 
   private isColumnNumeric(columnIndex: number): boolean {
-    const rows = this.filteredData.slice(1);
-    return rows.every(row => {
-      const cell = row[columnIndex]?.trim();
-      return cell !== undefined && cell !== '' && !isNaN(Number(cell));
+    const columnKey = this.headers[columnIndex];
+    return this.filteredData.every(row => {
+      const cell = String(row[columnKey] ?? '').trim();
+      return cell !== '' && !isNaN(Number(cell));
     });
   }
 }

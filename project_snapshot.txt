@@ -1,11 +1,11 @@
-PROJECT SNAPSHOT - Project: csv-grid-test
-Created: 2025-07-13 01:35:17
-Root Directory: /home/john/CODE/HTML-COMPONENTS/PROJECTS/csv-grid-test
+PROJECT SNAPSHOT - Project: flexdata
+Created: 2025-07-13 04:11:18
+Root Directory: /home/john/CODE/HTML-COMPONENTS/PROJECTS/flexdata
 ================================================================================
 
 PROJECT STRUCTURE
 --------------------------------------------------------------------------------
-[DIR] csv-grid-test/
+[DIR] flexdata/
   [FILE] build.js
   [FILE] package.json
   [FILE] package-lock.json
@@ -17,6 +17,7 @@ PROJECT STRUCTURE
    [FILE] csv-grid.ts
 [DIR] node_modules/
   [FILE] .package-lock.json
+[DIR] .git/
 [DIR] public/
   [FILE] index.html
  [DIR] api/
@@ -38,7 +39,6 @@ const fs = require('fs');
 
 const isWatch = process.argv.includes('--watch');
 
-// Ensure public/assets/js/ directory exists
 if (!fs.existsSync('public/assets/js')) {
   fs.mkdirSync('public/assets/js', { recursive: true });
 }
@@ -75,16 +75,15 @@ build().catch((error) => {
 FILE: package.json
 --------------------------------------------------------------------------------
 {
-  "name": "csv-grid-test",
+  "name": "flexdata",
   "version": "1.0.0",
   "scripts": {
     "build": "node build.js",
-    "watch": "node build.js --watch",
-    "serve": "php -S localhost:8000 -t public"
+    "serve": "php -S localhost:8000 -t public",
+    "watch": "node build.js --watch"
   },
-  "devDependencies": {
-    "esbuild": "^0.25.6",
-    "typescript": "^5.8.3"
+  "dependencies": {
+    "esbuild": "^0.21.5"
   }
 }--------------------------------------------------------------------------------
 
@@ -613,71 +612,207 @@ FILE: project_snapshot.txt
 
 FILE: public/api/data.php
 --------------------------------------------------------------------------------
---------------------------------------------------------------------------------
+<?php
+header('Content-Type: text/csv');
+header('Access-Control-Allow-Origin: *'); // Allow CORS for local testing
+
+// Sample data arrays for randomization
+$names = [
+    'Alice', 'Bob', 'Charlie', 'David', 'Emma', 'Frank', 'Grace', 'Hannah', 'Isaac', 'Julia',
+    'Kevin', 'Laura', 'Mike', 'Nancy', 'Oliver', 'Patricia', 'Quincy', 'Rachel', 'Sam', 'Tara',
+    'Ursula', 'Victor', 'Wendy', 'Xavier', 'Yvonne', 'Zach', 'Amelia', 'Ben', 'Clara', 'Daniel',
+    'Ella', 'Finn', 'Gemma', 'Henry', 'Isabelle', 'Jack', 'Kylie', 'Liam', 'Mia', 'Noah'
+];
+$cities = [
+    'New York', 'London', 'Paris', 'Tokyo', 'Sydney', 'Berlin', 'Toronto', 'Chicago', 'Mumbai', 'Rio',
+    'Amsterdam', 'Singapore', 'Dubai', 'Seoul', 'Barcelona', 'Miami', 'Vancouver', 'Cape Town', 'Bangkok', 'Rome'
+];
+
+// Generate 50 records
+$csvData = "Name,Age,City\n";
+for ($i = 0; $i < 50; $i++) {
+    $name = $names[array_rand($names)];
+    $age = rand(18, 80); // Random age between 18 and 80
+    $city = $cities[array_rand($cities)];
+    $csvData .= "$name,$age,$city\n";
+}
+
+echo $csvData;
+?>--------------------------------------------------------------------------------
 
 FILE: public/assets/js/csv-grid.js
 --------------------------------------------------------------------------------
-"use strict";(()=>{var a=class extends HTMLElement{data=[];sortDirection=1;sortColumn=-1;constructor(){super();let r=this.attachShadow({mode:"open"});r.innerHTML=`
+"use strict";(()=>{var c=class extends HTMLElement{data=[];filteredData=[];sortDirection=1;sortColumn=-1;currentPage=1;rowsPerPage=10;searchQuery="";constructor(){super();let r=this.attachShadow({mode:"open"});r.innerHTML=`
       <style>
+        :host {
+          display: block;
+          font-family: 'Helvetica', 'Arial', sans-serif;
+          color: #2e3440;
+        }
         .grid-container {
-          border: 1px solid #ddd;
-          border-radius: 4px;
+          background: #ffffff;
+          border: 1px solid #d8dee9;
+          border-radius: 8px;
           max-width: 100%;
           overflow-x: auto;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         table {
           width: 100%;
           border-collapse: collapse;
+          table-layout: auto;
         }
         th {
-          background: #f4f4f4;
-          padding: 8px;
+          background: #d9e6f2;
+          padding: 12px;
           cursor: pointer;
           user-select: none;
+          text-align: left;
+          font-size: 16px;
+          font-weight: 600;
+          color: #2e3440;
+          border-bottom: 2px solid #d8dee9;
+          transition: background 0.2s ease;
         }
         th:hover {
-          background: #e0e0e0;
+          background: #c8d7e8;
         }
         td {
-          padding: 8px;
-          border: 1px solid #ddd;
+          padding: 12px;
+          font-size: 14px;
+          border-bottom: 1px solid #d8dee9;
+        }
+        td.message-bubble {
+          background: #f0f4f8;
+          border-radius: 6px;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        tr:nth-child(even) {
+          background: #e6f0fa;
         }
         th.sort-indicator::after {
           content: ' \u2195';
+          font-size: 12px;
         }
         th.sort-ascending::after {
           content: ' \u2191';
+          font-size: 12px;
         }
         th.sort-descending::after {
           content: ' \u2193';
+          font-size: 12px;
         }
         .loading {
-          padding: 10px;
-          color: #555;
+          padding: 12px;
+          color: #5e81ac;
+          font-size: 14px;
+          text-align: center;
         }
         .error {
-          padding: 10px;
-          color: red;
+          padding: 12px;
+          color: #d32f2f;
+          font-size: 14px;
+          text-align: center;
+        }
+        .pagination {
+          margin-top: 16px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 14px;
+          padding: 0 12px;
+        }
+        .pagination button {
+          padding: 8px 16px;
+          cursor: pointer;
+          border: 1px solid #d8dee9;
+          background: #ffffff;
+          border-radius: 6px;
+          font-family: 'Helvetica', 'Arial', sans-serif;
+          font-size: 14px;
+          color: #81a1c1;
+          transition: background 0.2s ease, box-shadow 0.2s ease;
+        }
+        .pagination button:hover:not(:disabled) {
+          background: #e6f0fa;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .pagination button:disabled {
+          cursor: not-allowed;
+          color: #a3be8c;
+          background: #f0f4f8;
+        }
+        .pagination select {
+          padding: 8px;
+          border: 1px solid #d8dee9;
+          border-radius: 6px;
+          font-family: 'Helvetica', 'Arial', sans-serif;
+          font-size: 14px;
+          color: #2e3440;
+          background: #ffffff;
+        }
+        .pagination select:focus {
+          outline: none;
+          border-color: #81a1c1;
+          box-shadow: 0 0 0 2px rgba(129, 161, 193, 0.2);
+        }
+        .pagination span {
+          font-size: 14px;
+          color: #2e3440;
+        }
+        .search-container {
+          margin-bottom: 16px;
+          padding: 0 12px;
+        }
+        .search-container input {
+          padding: 8px 12px;
+          width: 100%;
+          max-width: 300px;
+          border: 1px solid #d8dee9;
+          border-radius: 6px;
+          font-family: 'Helvetica', 'Arial', sans-serif;
+          font-size: 14px;
+          color: #2e3440;
+          background: #ffffff;
+        }
+        .search-container input:focus {
+          outline: none;
+          border-color: #81a1c1;
+          box-shadow: 0 0 0 2px rgba(129, 161, 193, 0.2);
         }
       </style>
+      <div class="search-container">
+        <input type="text" placeholder="Search..." class="search-input">
+      </div>
       <div class="grid-container">
-        <table>
+        <table role="grid">
           <thead></thead>
           <tbody></tbody>
         </table>
       </div>
-    `}static get observedAttributes(){return["data-src"]}attributeChangedCallback(r,e,t){r==="data-src"&&t&&this.loadCSV(t)}connectedCallback(){let r=this.getAttribute("data-src");r&&this.loadCSV(r),this.shadowRoot?.addEventListener("click",e=>{let t=e.target.closest("th");if(t){let o=Array.from(this.shadowRoot?.querySelectorAll("th")||[]).indexOf(t);this.sortTable(o)}}),this.shadowRoot?.addEventListener("keydown",e=>{let t=e.target.closest("th");if(t&&(e.key==="Enter"||e.key===" ")){e.preventDefault();let o=Array.from(this.shadowRoot?.querySelectorAll("th")||[]).indexOf(t);this.sortTable(o)}})}async loadCSV(r){try{let e=this.shadowRoot?.querySelector("tbody");e&&(e.innerHTML='<tr><td class="loading">Loading...</td></tr>');let t=await fetch(r);if(!t.ok)throw new Error(`Failed to fetch CSV: ${t.status}`);let o=await t.text();this.data=this.parseCSV(o),this.renderTable()}catch(e){let t=this.shadowRoot?.querySelector("tbody");t&&(t.innerHTML=`<tr><td class="error">Error: ${e.message}</td></tr>`)}}parseCSV(r){return r.trim().split(`
-`).map(e=>e.split(",").map(t=>t.trim()))}renderTable(){let r=this.data[0]??[],e=this.data.slice(1)??[],t=this.shadowRoot?.querySelector("thead"),o=this.shadowRoot?.querySelector("tbody");t&&o&&(t.innerHTML=`
+      <div class="pagination">
+        <button class="prev" disabled>Previous</button>
+        <span class="page-info">Page 1 of 1</span>
+        <button class="next">Next</button>
+        <select class="rows-per-page">
+          <option value="5">5 rows</option>
+          <option value="10" selected>10 rows</option>
+          <option value="20">20 rows</option>
+          <option value="50">50 rows</option>
+        </select>
+      </div>
+    `}static get observedAttributes(){return["data-src","rows-per-page"]}attributeChangedCallback(r,o,t){if(r==="data-src"&&t)this.loadCSV(t);else if(r==="rows-per-page"&&t){let e=parseInt(t,10);!isNaN(e)&&e>0&&(this.rowsPerPage=e,this.currentPage=1,this.renderTable(),this.updatePaginationControls())}}connectedCallback(){let r=this.getAttribute("data-src"),o=this.getAttribute("rows-per-page");if(o){let e=parseInt(o,10);!isNaN(e)&&e>0&&(this.rowsPerPage=e)}r&&this.loadCSV(r);let t=this.shadowRoot;t&&(t.querySelector(".prev")?.addEventListener("click",()=>{this.currentPage>1&&(this.currentPage--,this.renderTable(),this.updatePaginationControls())}),t.querySelector(".next")?.addEventListener("click",()=>{let e=Math.ceil((this.filteredData.length-1)/this.rowsPerPage);this.currentPage<e&&(this.currentPage++,this.renderTable(),this.updatePaginationControls())}),t.querySelector(".rows-per-page")?.addEventListener("change",e=>{let s=e.target;this.rowsPerPage=parseInt(s.value,10),this.currentPage=1,this.renderTable(),this.updatePaginationControls()}),t.querySelector(".search-input")?.addEventListener("input",e=>{this.searchQuery=e.target.value.toLowerCase(),this.applyFilter(),this.currentPage=1,this.renderTable(),this.updatePaginationControls()}),t.addEventListener("click",e=>{let s=e.target.closest("th");if(s){let a=Array.from(t.querySelectorAll("th")||[]).indexOf(s);this.sortTable(a)}}),t.addEventListener("keydown",e=>{let s=e.target.closest("th");if(s&&(e.key==="Enter"||e.key===" ")){e.preventDefault();let a=Array.from(t.querySelectorAll("th")||[]).indexOf(s);this.sortTable(a)}}))}async loadCSV(r){try{let o=this.shadowRoot?.querySelector("tbody");o&&(o.innerHTML='<tr><td class="loading">Loading...</td></tr>');let t=await fetch(r);if(!t.ok)throw new Error(`HTTP error! status: ${t.status}`);let e=await t.text();this.data=this.parseCSV(e),this.filteredData=[...this.data],this.currentPage=1,this.renderTable(),this.updatePaginationControls()}catch(o){console.error("Fetch error:",o);let t=this.shadowRoot?.querySelector("tbody");t&&(t.innerHTML=`<tr><td class="error">Error: ${o.message}</td></tr>`)}}parseCSV(r){return r.trim().split(`
+`).map(o=>o.split(",").map(t=>t.trim()))}applyFilter(){if(!this.searchQuery){this.filteredData=[...this.data];return}let r=this.data[0]??[];this.filteredData=[r,...this.data.slice(1).filter(o=>o.some(t=>t.toLowerCase().includes(this.searchQuery)))]}renderTable(){let r=this.filteredData[0]??[],o=this.filteredData.slice(1)??[],t=(this.currentPage-1)*this.rowsPerPage,e=t+this.rowsPerPage,s=o.slice(t,e),a=this.shadowRoot?.querySelector("thead"),i=this.shadowRoot?.querySelector("tbody");a&&i&&(a.innerHTML=`
         <tr>
-          ${r.map((i,s)=>`<th class="${s===this.sortColumn?this.sortDirection>0?"sort-ascending":"sort-descending":"sort-indicator"}">${i}</th>`).join("")}
+          ${r.map((n,d)=>`<th role="columnheader" class="${d===this.sortColumn?this.sortDirection>0?"sort-ascending":"sort-descending":"sort-indicator"}">${n}</th>`).join("")}
         </tr>
-      `,o.innerHTML=`
-        ${e.map(i=>`
-          <tr>
-            ${i.map(s=>`<td>${s}</td>`).join("")}
+      `,i.innerHTML=`
+        ${s.map(n=>`
+          <tr role="row">
+            ${n.map(d=>`<td role="gridcell" class="message-bubble">${d}</td>`).join("")}
           </tr>
         `).join("")}
-      `)}sortTable(r){this.sortColumn===r?this.sortDirection*=-1:this.sortDirection=1,this.sortColumn=r;let e=this.shadowRoot?.querySelector("tbody");if(!e)return;let t=Array.from(e.querySelectorAll("tr")),o=this.isColumnNumeric(r);t.sort((s,n)=>{let d=s.cells[r]?.textContent?.trim()??"",c=n.cells[r]?.textContent?.trim()??"";return o?(Number(d)-Number(c))*this.sortDirection:d.localeCompare(c)*this.sortDirection}),e.innerHTML="",t.forEach(s=>e.appendChild(s)),(this.shadowRoot?.querySelectorAll("th")||[]).forEach((s,n)=>{s.classList.remove("sort-indicator","sort-ascending","sort-descending"),n===r?(s.classList.add(this.sortDirection>0?"sort-ascending":"sort-descending"),s.setAttribute("aria-sort",this.sortDirection>0?"ascending":"descending")):(s.classList.add("sort-indicator"),s.setAttribute("aria-sort","none"))})}isColumnNumeric(r){let e=this.shadowRoot?.querySelectorAll("tbody tr");return Array.from(e||[]).every(t=>{let o=t.cells[r]?.textContent?.trim();return o!==void 0&&o!==""&&!isNaN(Number(o))})}};customElements.define("csv-grid",a);})();
+      `)}updatePaginationControls(){let r=this.filteredData.length-1,o=Math.ceil(r/this.rowsPerPage),t=this.shadowRoot;if(t){let e=t.querySelector(".prev"),s=t.querySelector(".next"),a=t.querySelector(".page-info"),i=t.querySelector(".rows-per-page");e.disabled=this.currentPage===1,s.disabled=this.currentPage===o||o===0,a.textContent=`Page ${this.currentPage} of ${o||1}`,i.value=this.rowsPerPage.toString()}}sortTable(r){this.sortColumn===r?this.sortDirection*=-1:this.sortDirection=1,this.sortColumn=r;let o=this.filteredData.slice(1),t=this.isColumnNumeric(r);o.sort((s,a)=>{let i=s[r]?.trim()??"",n=a[r]?.trim()??"";return t?(Number(i)-Number(n))*this.sortDirection:i.localeCompare(n)*this.sortDirection}),this.filteredData=[this.filteredData[0],...o],this.currentPage=1,this.renderTable(),this.updatePaginationControls(),(this.shadowRoot?.querySelectorAll("th")||[]).forEach((s,a)=>{s.classList.remove("sort-indicator","sort-ascending","sort-descending"),a===r?(s.classList.add(this.sortDirection>0?"sort-ascending":"sort-descending"),s.setAttribute("aria-sort",this.sortDirection>0?"ascending":"descending")):(s.classList.add("sort-indicator"),s.setAttribute("aria-sort","none"))})}isColumnNumeric(r){return this.filteredData.slice(1).every(t=>{let e=t[r]?.trim();return e!==void 0&&e!==""&&!isNaN(Number(e))})}};customElements.define("csv-grid",c);})();
 --------------------------------------------------------------------------------
 
 FILE: public/index.html
@@ -689,18 +824,65 @@ FILE: public/index.html
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CSV Grid Test</title>
   <link rel="icon" href="/favicon.ico">
+  <style>
+    body {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background: #f0f4f8;
+      color: #2e3440;
+      margin: 0;
+      padding: 32px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: #2e3440;
+      margin-bottom: 24px;
+      text-align: center;
+      background: #ffffff;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      border: 1px solid #d8dee9;
+      max-width: 1200px;
+      width: 100%;
+    }
+    csv-grid {
+      max-width: 1200px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      padding: 16px;
+    }
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 8px;
+      }
+      h1 {
+        font-size: 24px;
+        padding: 12px 16px;
+      }
+      csv-grid {
+        padding: 8px;
+      }
+    }
+  </style>
 </head>
 <body>
   <h1>CSV Grid Component Test</h1>
-  <csv-grid data-src="data.csv"></csv-grid>
+  <csv-grid data-src="api/data.php" rows-per-page="10"></csv-grid>
   <script src="assets/js/csv-grid.js"></script>
 </body>
 </html>--------------------------------------------------------------------------------
 
 FILE: README.md
 --------------------------------------------------------------------------------
-CSV Grid Test Project
-A test project for a TypeScript-based Web Component (<csv-grid>) that loads and displays a CSV file as a sortable table, using esbuild for bundling and PHP's built-in server for serving. The component library is organized to support future expansion, with JavaScript output in public/assets/js/.
+FlexData
+FlexData is a lightweight, modular TypeScript-based Web Component suite for managing JSON data in a master-detail interface. It includes a sortable, paginated, and filterable data grid (<csv-grid>), a detail view for selected rows (<detail-view>), and a control panel for actions like exporting and column toggling (<control-panel>). Built with esbuild for bundling and served via PHP's built-in server, it uses Shadow DOM for style encapsulation and a centralized StateManager for reactive state updates. The components feature a modern, customizable design with a default Helvetica-based theme, fully configurable via CSS custom properties for flexible styling.
 Prerequisites
 
 Node.js (for esbuild and TypeScript)
@@ -716,7 +898,7 @@ npm install
 Build the TypeScript code:
 npm run build
 
-This compiles src/components/csv-grid.ts to public/assets/js/csv-grid.js.
+This compiles src/components/*.ts and src/state-manager.ts to public/assets/js/.
 
 Start the PHP server:
 npm run serve
@@ -726,50 +908,166 @@ This runs php -S localhost:8000 -t public, serving files from the public/ direct
 Development mode (optional):
 npm run watch
 
-This rebuilds the JavaScript on file changes for live development.
+This rebuilds the JavaScript on file changes.
 
-Open the project:Visit http://localhost:8000 in your browser to see the CSV grid.
+Open the project:Visit http://localhost:8000 to see the FlexData components.
 
 
 Project Structure
 
-src/components/csv-grid.ts: TypeScript code for the <csv-grid> web component.
-public/assets/js/csv-grid.js: Compiled, minified JavaScript (production-ready).
-public/index.html: Test HTML page to demonstrate the component.
-public/data.csv: Sample CSV file.
+src/components/csv-grid.ts: Sortable, paginated, filterable grid component.
+src/components/detail-view.ts: Detail view for selected row data.
+src/components/control-panel.ts: Controls for export, reset, and column toggling.
+src/state-manager.ts: Centralized state manager for reactive updates.
+public/assets/js/*.js: Compiled, minified JavaScript (production-ready).
+public/index.html: Test HTML page with customizable styling.
+public/api/data.php: PHP script to serve JSON data (50 records).
+public/data.csv: Sample CSV file (optional fallback).
 build.js: esbuild script to compile and bundle TypeScript.
 tsconfig.json: TypeScript configuration.
 package.json: Node.js configuration with scripts.
+.gitignore: Ignores build artifacts, node modules, and temporary files.
 
 Deployment to Production
 
-Run npm run build to generate public/assets/js/csv-grid.js.
-Copy the public/ directory (or specific files: assets/js/csv-grid.js, data.csv) to the production server’s web root (e.g., /var/www/html/ for Apache/Nginx or static/ for Django).
-Include in your production HTML:<table is="csv-grid" data-src="/data.csv"></table>
-<script src="/assets/js/csv-grid.js"></script>
+Run npm run build to generate public/assets/js/*.js.
+Copy the public/ directory (or specific files: assets/js/*.js, api/data.php, index.html) to the production server’s web root (e.g., /var/www/html/ for Apache/Nginx or static/ for Django).
+Include in your production HTML:<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Page</title>
+  <style>
+    :root {
+      /* Customize as needed */
+      --font-family: 'Helvetica', 'Arial', sans-serif;
+      --bg-body: #f0f4f8;
+      --bg-primary: #ffffff;
+      --bg-row-even: #e6f0fa;
+      --bg-header: #d9e6f2;
+      --bg-header-hover: #c8d7e8;
+      --bg-cell-bubble: #f0f4f8;
+      --bg-selected: #a3be8c;
+      --text-primary: #2e3440;
+      --text-secondary: #5e81ac;
+      --text-button: #81a1c1;
+      --text-disabled: #a3be8c;
+      --text-error: #d32f2f;
+      --border-color: #d8dee9;
+      --shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      --border-radius: 8px;
+      --padding: 16px;
+      --padding-mobile: 8px;
+      --font-size-header: 28px;
+      --font-size-header-mobile: 24px;
+      --font-size-cell: 14px;
+      --font-size-cell-mobile: 13px;
+    }
+    body {
+      font-family: var(--font-family);
+      background: var(--bg-body);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 32px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: var(--font-size-header);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      text-align: center;
+      background: var(--bg-primary);
+      padding: 16px 24px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+      max-width: 1200px;
+      width: 100%;
+    }
+    csv-grid, control-panel, detail-view {
+      max-width: 1200px;
+      width: 100%;
+      background: var(--bg-primary);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: var(--padding);
+    }
+    @media (max-width: 768px) {
+      body { padding: var(--padding-mobile); }
+      h1 { font-size: var(--font-size-header-mobile); padding: var(--padding-mobile); }
+      csv-grid, control-panel, detail-view { padding: var(--padding-mobile); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Your Data Suite</h1>
+  <control-panel></control-panel>
+  <csv-grid data-src="/api/data.php" rows-per-page="10"></csv-grid>
+  <detail-view></detail-view>
+  <script src="/assets/js/csv-grid.js"></script>
+  <script src="/assets/js/detail-view.js"></script>
+  <script src="/assets/js/control-panel.js"></script>
+  <script src="/assets/js/state-manager.js"></script>
+</body>
+</html>
 
 
-Ensure the server serves static files with correct MIME types (e.g., text/javascript for .js, text/csv for .csv).
+Ensure the server supports PHP (for data.php) and serves static files with correct MIME types (e.g., text/javascript for .js).
 
 Usage
-The <table is="csv-grid" data-src="data.csv"></table> element loads and displays the CSV file specified in data-src. Click or press Enter/Space on column headers to sort the table.
+The FlexData suite provides a master-detail interface for JSON data:
+
+<csv-grid data-src="/api/data.php" rows-per-page="10">: Displays a sortable, paginated, filterable grid. Click rows to select and view details.
+<detail-view>: Shows selected row data in a card format.
+<control-panel>: Offers buttons to export data as CSV, reset search, and toggle column visibility.
+Features:
+Sorting: Click or press Enter/Space on column headers to sort (numeric or alphabetic).
+Pagination: Navigate with Previous/Next or select rows per page (5, 10, 20, 50).
+Filtering: Search via an input field (case-insensitive, any column).
+Column Toggling: Show/hide columns via checkboxes.
+Export: Download filtered data as CSV.
+Styling: Fully customizable via CSS variables (default: Helvetica, light theme). Override in :root or :host.
+Accessibility: ARIA attributes (role="grid", aria-sort).
+
+
+State Management: Centralized StateManager ensures reactive updates across components.
+
+Customization
+Override CSS variables in your HTML or CSS to customize the appearance:
+:root {
+  --bg-body: #f8f9fa;
+  --bg-primary: #ffffff;
+  --bg-row-even: #e9ecef;
+  --font-family: 'Roboto', sans-serif;
+  --text-button: #007bff;
+  /* Add more as needed */
+}
+
 Expanding the Component Library
 
-Add new components to src/components/ (e.g., src/components/data-table.ts).
+Add new components to src/components/ (e.g., src/components/chart-view.ts).
 Update build.js to include new entry points:entryPoints: [
   { in: 'src/components/csv-grid.ts', out: 'csv-grid' },
-  { in: 'src/components/data-table.ts', out: 'data-table' }
+  { in: 'src/components/detail-view.ts', out: 'detail-view' },
+  { in: 'src/components/control-panel.ts', out: 'control-panel' },
+  { in: 'src/state-manager.ts', out: 'state-manager' },
+  { in: 'src/components/chart-view.ts', out: 'chart-view' }
 ]
 
 
-For app-specific code, create src/app/app.ts and add to entryPoints (e.g., { in: 'src/app/app.ts', out: 'app' }).
+For app-specific code, create src/app/app.ts and add to entryPoints.
 
 Notes
 
-The CSV parser is basic (splits on commas and newlines). For complex CSVs, consider adding Papa Parse via a CDN:<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+The data source (api/data.php) returns JSON. For CSV fallback, consider Papa Parse:<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
 
-The public/ directory is self-contained and can be copied to a production server.
+Components use Shadow DOM for style encapsulation; page styling is in index.html.
+The public/ directory is self-contained for production.
 The project is lightweight, using only TypeScript, esbuild, and native Web Components APIs.
 --------------------------------------------------------------------------------
 
@@ -777,94 +1075,255 @@ FILE: src/components/csv-grid.ts
 --------------------------------------------------------------------------------
 class CSVGrid extends HTMLElement {
   private data: string[][] = [];
+  private filteredData: string[][] = [];
   private sortDirection: number = 1;
   private sortColumn: number = -1;
+  private currentPage: number = 1;
+  private rowsPerPage: number = 10;
+  private searchQuery: string = '';
 
   constructor() {
     super();
     const shadow = this.attachShadow({ mode: 'open' });
     shadow.innerHTML = `
       <style>
+        :host {
+          display: block;
+          font-family: 'Helvetica', 'Arial', sans-serif;
+          color: #2e3440;
+        }
         .grid-container {
-          border: 1px solid #ddd;
-          border-radius: 4px;
+          background: #ffffff;
+          border: 1px solid #d8dee9;
+          border-radius: 8px;
           max-width: 100%;
           overflow-x: auto;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         table {
           width: 100%;
           border-collapse: collapse;
+          table-layout: auto;
         }
         th {
-          background: #f4f4f4;
-          padding: 8px;
+          background: #d9e6f2;
+          padding: 12px;
           cursor: pointer;
           user-select: none;
+          text-align: left;
+          font-size: 16px;
+          font-weight: 600;
+          color: #2e3440;
+          border-bottom: 2px solid #d8dee9;
+          transition: background 0.2s ease;
         }
         th:hover {
-          background: #e0e0e0;
+          background: #c8d7e8;
         }
         td {
-          padding: 8px;
-          border: 1px solid #ddd;
+          padding: 12px;
+          font-size: 14px;
+          border-bottom: 1px solid #d8dee9;
+        }
+        td.message-bubble {
+          background: #f0f4f8;
+          border-radius: 6px;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        tr:nth-child(even) {
+          background: #e6f0fa;
         }
         th.sort-indicator::after {
           content: ' ↕';
+          font-size: 12px;
         }
         th.sort-ascending::after {
           content: ' ↑';
+          font-size: 12px;
         }
         th.sort-descending::after {
           content: ' ↓';
+          font-size: 12px;
         }
         .loading {
-          padding: 10px;
-          color: #555;
+          padding: 12px;
+          color: #5e81ac;
+          font-size: 14px;
+          text-align: center;
         }
         .error {
-          padding: 10px;
-          color: red;
+          padding: 12px;
+          color: #d32f2f;
+          font-size: 14px;
+          text-align: center;
+        }
+        .pagination {
+          margin-top: 16px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 14px;
+          padding: 0 12px;
+        }
+        .pagination button {
+          padding: 8px 16px;
+          cursor: pointer;
+          border: 1px solid #d8dee9;
+          background: #ffffff;
+          border-radius: 6px;
+          font-family: 'Helvetica', 'Arial', sans-serif;
+          font-size: 14px;
+          color: #81a1c1;
+          transition: background 0.2s ease, box-shadow 0.2s ease;
+        }
+        .pagination button:hover:not(:disabled) {
+          background: #e6f0fa;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .pagination button:disabled {
+          cursor: not-allowed;
+          color: #a3be8c;
+          background: #f0f4f8;
+        }
+        .pagination select {
+          padding: 8px;
+          border: 1px solid #d8dee9;
+          border-radius: 6px;
+          font-family: 'Helvetica', 'Arial', sans-serif;
+          font-size: 14px;
+          color: #2e3440;
+          background: #ffffff;
+        }
+        .pagination select:focus {
+          outline: none;
+          border-color: #81a1c1;
+          box-shadow: 0 0 0 2px rgba(129, 161, 193, 0.2);
+        }
+        .pagination span {
+          font-size: 14px;
+          color: #2e3440;
+        }
+        .search-container {
+          margin-bottom: 16px;
+          padding: 0 12px;
+        }
+        .search-container input {
+          padding: 8px 12px;
+          width: 100%;
+          max-width: 300px;
+          border: 1px solid #d8dee9;
+          border-radius: 6px;
+          font-family: 'Helvetica', 'Arial', sans-serif;
+          font-size: 14px;
+          color: #2e3440;
+          background: #ffffff;
+        }
+        .search-container input:focus {
+          outline: none;
+          border-color: #81a1c1;
+          box-shadow: 0 0 0 2px rgba(129, 161, 193, 0.2);
         }
       </style>
+      <div class="search-container">
+        <input type="text" placeholder="Search..." class="search-input">
+      </div>
       <div class="grid-container">
-        <table>
+        <table role="grid">
           <thead></thead>
           <tbody></tbody>
         </table>
+      </div>
+      <div class="pagination">
+        <button class="prev" disabled>Previous</button>
+        <span class="page-info">Page 1 of 1</span>
+        <button class="next">Next</button>
+        <select class="rows-per-page">
+          <option value="5">5 rows</option>
+          <option value="10" selected>10 rows</option>
+          <option value="20">20 rows</option>
+          <option value="50">50 rows</option>
+        </select>
       </div>
     `;
   }
 
   static get observedAttributes(): string[] {
-    return ['data-src'];
+    return ['data-src', 'rows-per-page'];
   }
 
   attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
     if (name === 'data-src' && newValue) {
       void this.loadCSV(newValue);
+    } else if (name === 'rows-per-page' && newValue) {
+      const rows = parseInt(newValue, 10);
+      if (!isNaN(rows) && rows > 0) {
+        this.rowsPerPage = rows;
+        this.currentPage = 1;
+        this.renderTable();
+        this.updatePaginationControls();
+      }
     }
   }
 
   connectedCallback(): void {
     const src = this.getAttribute('data-src');
+    const rowsPerPage = this.getAttribute('rows-per-page');
+    if (rowsPerPage) {
+      const rows = parseInt(rowsPerPage, 10);
+      if (!isNaN(rows) && rows > 0) {
+        this.rowsPerPage = rows;
+      }
+    }
     if (src) {
       void this.loadCSV(src);
     }
-    this.shadowRoot?.addEventListener('click', (e: Event) => {
-      const th = (e.target as HTMLElement).closest('th');
-      if (th) {
-        const index = Array.from(this.shadowRoot?.querySelectorAll('th') || []).indexOf(th);
-        this.sortTable(index);
-      }
-    });
-    this.shadowRoot?.addEventListener('keydown', (e: KeyboardEvent) => {
-      const th = (e.target as HTMLElement).closest('th');
-      if (th && (e.key === 'Enter' || e.key === ' ')) {
-        e.preventDefault();
-        const index = Array.from(this.shadowRoot?.querySelectorAll('th') || []).indexOf(th);
-        this.sortTable(index);
-      }
-    });
+    const shadow = this.shadowRoot;
+    if (shadow) {
+      shadow.querySelector('.prev')?.addEventListener('click', () => {
+        if (this.currentPage > 1) {
+          this.currentPage--;
+          this.renderTable();
+          this.updatePaginationControls();
+        }
+      });
+      shadow.querySelector('.next')?.addEventListener('click', () => {
+        const totalPages = Math.ceil((this.filteredData.length - 1) / this.rowsPerPage);
+        if (this.currentPage < totalPages) {
+          this.currentPage++;
+          this.renderTable();
+          this.updatePaginationControls();
+        }
+      });
+      shadow.querySelector('.rows-per-page')?.addEventListener('change', (e: Event) => {
+        const select = e.target as HTMLSelectElement;
+        this.rowsPerPage = parseInt(select.value, 10);
+        this.currentPage = 1;
+        this.renderTable();
+        this.updatePaginationControls();
+      });
+      shadow.querySelector('.search-input')?.addEventListener('input', (e: Event) => {
+        this.searchQuery = (e.target as HTMLInputElement).value.toLowerCase();
+        this.applyFilter();
+        this.currentPage = 1;
+        this.renderTable();
+        this.updatePaginationControls();
+      });
+      shadow.addEventListener('click', (e: Event) => {
+        const th = (e.target as HTMLElement).closest('th');
+        if (th) {
+          const index = Array.from(shadow.querySelectorAll('th') || []).indexOf(th);
+          this.sortTable(index);
+        }
+      });
+      shadow.addEventListener('keydown', (e: KeyboardEvent) => {
+        const th = (e.target as HTMLElement).closest('th');
+        if (th && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          const index = Array.from(shadow.querySelectorAll('th') || []).indexOf(th);
+          this.sortTable(index);
+        }
+      });
+    }
   }
 
   private async loadCSV(url: string): Promise<void> {
@@ -879,7 +1338,10 @@ class CSVGrid extends HTMLElement {
       }
       const text = await response.text();
       this.data = this.parseCSV(text);
+      this.filteredData = [...this.data]; // Initialize filtered data
+      this.currentPage = 1;
       this.renderTable();
+      this.updatePaginationControls();
     } catch (error) {
       console.error('Fetch error:', error);
       const tbody = this.shadowRoot?.querySelector('tbody');
@@ -896,24 +1358,55 @@ class CSVGrid extends HTMLElement {
       .map(row => row.split(',').map(cell => cell.trim()));
   }
 
+  private applyFilter(): void {
+    if (!this.searchQuery) {
+      this.filteredData = [...this.data];
+      return;
+    }
+    const header = this.data[0] ?? [];
+    this.filteredData = [header, ...this.data.slice(1).filter(row =>
+      row.some(cell => cell.toLowerCase().includes(this.searchQuery))
+    )];
+  }
+
   private renderTable(): void {
-    const headers = this.data[0] ?? [];
-    const body = this.data.slice(1) ?? [];
+    const headers = this.filteredData[0] ?? [];
+    const body = this.filteredData.slice(1) ?? [];
+    const startIndex = (this.currentPage - 1) * this.rowsPerPage;
+    const endIndex = startIndex + this.rowsPerPage;
+    const paginatedBody = body.slice(startIndex, endIndex);
     const thead = this.shadowRoot?.querySelector('thead');
     const tbody = this.shadowRoot?.querySelector('tbody');
     if (thead && tbody) {
       thead.innerHTML = `
         <tr>
-          ${headers.map((h, i) => `<th class="${i === this.sortColumn ? (this.sortDirection > 0 ? 'sort-ascending' : 'sort-descending') : 'sort-indicator'}">${h}</th>`).join('')}
+          ${headers.map((h, i) => `<th role="columnheader" class="${i === this.sortColumn ? (this.sortDirection > 0 ? 'sort-ascending' : 'sort-descending') : 'sort-indicator'}">${h}</th>`).join('')}
         </tr>
       `;
       tbody.innerHTML = `
-        ${body.map(row => `
-          <tr>
-            ${row.map(cell => `<td>${cell}</td>`).join('')}
+        ${paginatedBody.map(row => `
+          <tr role="row">
+            ${row.map(cell => `<td role="gridcell" class="message-bubble">${cell}</td>`).join('')}
           </tr>
         `).join('')}
       `;
+    }
+  }
+
+  private updatePaginationControls(): void {
+    const totalRows = this.filteredData.length - 1; // Exclude header
+    const totalPages = Math.ceil(totalRows / this.rowsPerPage);
+    const shadow = this.shadowRoot;
+    if (shadow) {
+      const prevButton = shadow.querySelector('.prev') as HTMLButtonElement;
+      const nextButton = shadow.querySelector('.next') as HTMLButtonElement;
+      const pageInfo = shadow.querySelector('.page-info');
+      const rowsPerPageSelect = shadow.querySelector('.rows-per-page') as HTMLSelectElement;
+
+      prevButton.disabled = this.currentPage === 1;
+      nextButton.disabled = this.currentPage === totalPages || totalPages === 0;
+      pageInfo.textContent = `Page ${this.currentPage} of ${totalPages || 1}`;
+      rowsPerPageSelect.value = this.rowsPerPage.toString();
     }
   }
 
@@ -925,23 +1418,22 @@ class CSVGrid extends HTMLElement {
     }
     this.sortColumn = columnIndex;
 
-    const tbody = this.shadowRoot?.querySelector('tbody');
-    if (!tbody) return;
-
-    const rows = Array.from(tbody.querySelectorAll('tr')) as HTMLTableRowElement[];
+    const body = this.filteredData.slice(1);
     const isNumeric = this.isColumnNumeric(columnIndex);
 
-    rows.sort((rowA, rowB) => {
-      const cellA = rowA.cells[columnIndex]?.textContent?.trim() ?? '';
-      const cellB = rowB.cells[columnIndex]?.textContent?.trim() ?? '';
+    body.sort((rowA, rowB) => {
+      const cellA = rowA[columnIndex]?.trim() ?? '';
+      const cellB = rowB[columnIndex]?.trim() ?? '';
       if (isNumeric) {
         return (Number(cellA) - Number(cellB)) * this.sortDirection;
       }
       return cellA.localeCompare(cellB) * this.sortDirection;
     });
 
-    tbody.innerHTML = '';
-    rows.forEach(row => tbody.appendChild(row));
+    this.filteredData = [this.filteredData[0], ...body];
+    this.currentPage = 1;
+    this.renderTable();
+    this.updatePaginationControls();
 
     const ths = this.shadowRoot?.querySelectorAll('th') || [];
     ths.forEach((th: HTMLTableCellElement, index: number) => {
@@ -957,9 +1449,9 @@ class CSVGrid extends HTMLElement {
   }
 
   private isColumnNumeric(columnIndex: number): boolean {
-    const rows = this.shadowRoot?.querySelectorAll('tbody tr') as NodeListOf<HTMLTableRowElement> | undefined;
-    return Array.from(rows || []).every(row => {
-      const cell = row.cells[columnIndex]?.textContent?.trim();
+    const rows = this.filteredData.slice(1);
+    return rows.every(row => {
+      const cell = row[columnIndex]?.trim();
       return cell !== undefined && cell !== '' && !isNaN(Number(cell));
     });
   }
@@ -992,18 +1484,21 @@ CONFIGURATION FILES
 FILE: package.json
 --------------------------------------------------------------------------------
 {
-  "name": "csv-grid-test",
+  "name": "flexdata",
   "version": "1.0.0",
   "scripts": {
     "build": "node build.js",
-    "watch": "node build.js --watch",
-    "serve": "php -S localhost:8000 -t public"
+    "serve": "php -S localhost:8000 -t public",
+    "watch": "node build.js --watch"
   },
-  "devDependencies": {
-    "esbuild": "^0.25.6",
-    "typescript": "^5.8.3"
+  "dependencies": {
+    "esbuild": "^0.21.5"
   }
 }--------------------------------------------------------------------------------
+
+FILE: .gitignore
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 FILE: tsconfig.json
 --------------------------------------------------------------------------------

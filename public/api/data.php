@@ -1,27 +1,63 @@
 <?php
-header('Content-Type: text/csv');
-header('Access-Control-Allow-Origin: *'); // Allow CORS for local testing
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
 
-// Sample data arrays for randomization
-$names = [
-    'Alice', 'Bob', 'Charlie', 'David', 'Emma', 'Frank', 'Grace', 'Hannah', 'Isaac', 'Julia',
-    'Kevin', 'Laura', 'Mike', 'Nancy', 'Oliver', 'Patricia', 'Quincy', 'Rachel', 'Sam', 'Tara',
-    'Ursula', 'Victor', 'Wendy', 'Xavier', 'Yvonne', 'Zach', 'Amelia', 'Ben', 'Clara', 'Daniel',
-    'Ella', 'Finn', 'Gemma', 'Henry', 'Isabelle', 'Jack', 'Kylie', 'Liam', 'Mia', 'Noah'
-];
-$cities = [
-    'New York', 'London', 'Paris', 'Tokyo', 'Sydney', 'Berlin', 'Toronto', 'Chicago', 'Mumbai', 'Rio',
-    'Amsterdam', 'Singapore', 'Dubai', 'Seoul', 'Barcelona', 'Miami', 'Vancouver', 'Cape Town', 'Bangkok', 'Rome'
-];
+$csvFile = __DIR__ . '/../data.csv';
+$data = [];
+$headers = [];
 
-// Generate 50 records
-$csvData = "Name,Age,City\n";
-for ($i = 0; $i < 50; $i++) {
-    $name = $names[array_rand($names)];
-    $age = rand(18, 80); // Random age between 18 and 80
-    $city = $cities[array_rand($cities)];
-    $csvData .= "$name,$age,$city\n";
+if (!file_exists($csvFile)) {
+    http_response_code(500);
+    echo json_encode(['error' => 'CSV file not found: ' . $csvFile]);
+    exit;
 }
 
-echo $csvData;
+if (($handle = fopen($csvFile, 'r')) === false) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Failed to open CSV file: ' . $csvFile]);
+    exit;
+}
+
+// Read headers
+$headers = fgetcsv($handle);
+if ($headers === false || empty($headers)) {
+    fclose($handle);
+    http_response_code(500);
+    echo json_encode(['error' => 'Invalid CSV: No headers found']);
+    exit;
+}
+
+// Validate headers (non-empty, unique)
+$headers = array_map('trim', $headers);
+if (in_array('', $headers)) {
+    fclose($handle);
+    http_response_code(500);
+    echo json_encode(['error' => 'Invalid CSV: Empty header names']);
+    exit;
+}
+$uniqueHeaders = array_unique($headers);
+if (count($uniqueHeaders) !== count($headers)) {
+    fclose($handle);
+    http_response_code(500);
+    echo json_encode(['error' => 'Invalid CSV: Duplicate header names']);
+    exit;
+}
+
+// Read data rows
+while (($row = fgetcsv($handle)) !== false) {
+    $rowData = [];
+    foreach ($headers as $index => $header) {
+        $rowData[$header] = isset($row[$index]) ? trim($row[$index]) : '';
+    }
+    $data[] = $rowData;
+}
+fclose($handle);
+
+// Check if data is empty
+if (empty($data)) {
+    echo json_encode([]);
+    exit;
+}
+
+echo json_encode($data);
 ?>
