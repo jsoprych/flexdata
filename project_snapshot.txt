@@ -1,0 +1,1023 @@
+PROJECT SNAPSHOT - Project: csv-grid-test
+Created: 2025-07-13 01:35:17
+Root Directory: /home/john/CODE/HTML-COMPONENTS/PROJECTS/csv-grid-test
+================================================================================
+
+PROJECT STRUCTURE
+--------------------------------------------------------------------------------
+[DIR] csv-grid-test/
+  [FILE] build.js
+  [FILE] package.json
+  [FILE] package-lock.json
+  [FILE] project_snapshot.txt
+  [FILE] README.md
+  [FILE] tsconfig.json
+[DIR] src/
+ [DIR] components/
+   [FILE] csv-grid.ts
+[DIR] node_modules/
+  [FILE] .package-lock.json
+[DIR] public/
+  [FILE] index.html
+ [DIR] api/
+   [FILE] data.php
+ [DIR] assets/
+  [DIR] css/
+  [DIR] js/
+    [FILE] csv-grid.js
+
+================================================================================
+
+FILE CONTENTS
+--------------------------------------------------------------------------------
+
+FILE: build.js
+--------------------------------------------------------------------------------
+const esbuild = require('esbuild');
+const fs = require('fs');
+
+const isWatch = process.argv.includes('--watch');
+
+// Ensure public/assets/js/ directory exists
+if (!fs.existsSync('public/assets/js')) {
+  fs.mkdirSync('public/assets/js', { recursive: true });
+}
+
+async function build() {
+  const context = await esbuild.context({
+    entryPoints: [
+      { in: 'src/components/csv-grid.ts', out: 'csv-grid' }
+    ],
+    outdir: 'public/assets/js',
+    bundle: true,
+    format: 'iife',
+    target: 'esnext',
+    platform: 'browser',
+    minify: !isWatch,
+    sourcemap: isWatch,
+  });
+
+  if (isWatch) {
+    await context.watch();
+    console.log('Watching for changes...');
+  } else {
+    await context.rebuild();
+    console.log('Build succeeded');
+    await context.dispose();
+  }
+}
+
+build().catch((error) => {
+  console.error('Build failed:', error);
+  process.exit(1);
+});--------------------------------------------------------------------------------
+
+FILE: package.json
+--------------------------------------------------------------------------------
+{
+  "name": "csv-grid-test",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node build.js",
+    "watch": "node build.js --watch",
+    "serve": "php -S localhost:8000 -t public"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.6",
+    "typescript": "^5.8.3"
+  }
+}--------------------------------------------------------------------------------
+
+FILE: package-lock.json
+--------------------------------------------------------------------------------
+{
+  "name": "csv-grid-test",
+  "version": "1.0.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "csv-grid-test",
+      "version": "1.0.0",
+      "devDependencies": {
+        "esbuild": "^0.25.6",
+        "typescript": "^5.8.3"
+      }
+    },
+    "node_modules/@esbuild/aix-ppc64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.25.6.tgz",
+      "integrity": "sha512-ShbM/3XxwuxjFiuVBHA+d3j5dyac0aEVVq1oluIDf71hUw0aRF59dV/efUsIwFnR6m8JNM2FjZOzmaZ8yG61kw==",
+      "cpu": [
+        "ppc64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "aix"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/android-arm": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/android-arm/-/android-arm-0.25.6.tgz",
+      "integrity": "sha512-S8ToEOVfg++AU/bHwdksHNnyLyVM+eMVAOf6yRKFitnwnbwwPNqKr3srzFRe7nzV69RQKb5DgchIX5pt3L53xg==",
+      "cpu": [
+        "arm"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "android"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/android-arm64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/android-arm64/-/android-arm64-0.25.6.tgz",
+      "integrity": "sha512-hd5zdUarsK6strW+3Wxi5qWws+rJhCCbMiC9QZyzoxfk5uHRIE8T287giQxzVpEvCwuJ9Qjg6bEjcRJcgfLqoA==",
+      "cpu": [
+        "arm64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "android"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/android-x64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/android-x64/-/android-x64-0.25.6.tgz",
+      "integrity": "sha512-0Z7KpHSr3VBIO9A/1wcT3NTy7EB4oNC4upJ5ye3R7taCc2GUdeynSLArnon5G8scPwaU866d3H4BCrE5xLW25A==",
+      "cpu": [
+        "x64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "android"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/darwin-arm64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.25.6.tgz",
+      "integrity": "sha512-FFCssz3XBavjxcFxKsGy2DYK5VSvJqa6y5HXljKzhRZ87LvEi13brPrf/wdyl/BbpbMKJNOr1Sd0jtW4Ge1pAA==",
+      "cpu": [
+        "arm64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "darwin"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/darwin-x64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-0.25.6.tgz",
+      "integrity": "sha512-GfXs5kry/TkGM2vKqK2oyiLFygJRqKVhawu3+DOCk7OxLy/6jYkWXhlHwOoTb0WqGnWGAS7sooxbZowy+pK9Yg==",
+      "cpu": [
+        "x64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "darwin"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/freebsd-arm64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/freebsd-arm64/-/freebsd-arm64-0.25.6.tgz",
+      "integrity": "sha512-aoLF2c3OvDn2XDTRvn8hN6DRzVVpDlj2B/F66clWd/FHLiHaG3aVZjxQX2DYphA5y/evbdGvC6Us13tvyt4pWg==",
+      "cpu": [
+        "arm64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "freebsd"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/freebsd-x64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/freebsd-x64/-/freebsd-x64-0.25.6.tgz",
+      "integrity": "sha512-2SkqTjTSo2dYi/jzFbU9Plt1vk0+nNg8YC8rOXXea+iA3hfNJWebKYPs3xnOUf9+ZWhKAaxnQNUf2X9LOpeiMQ==",
+      "cpu": [
+        "x64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "freebsd"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/linux-arm": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-arm/-/linux-arm-0.25.6.tgz",
+      "integrity": "sha512-SZHQlzvqv4Du5PrKE2faN0qlbsaW/3QQfUUc6yO2EjFcA83xnwm91UbEEVx4ApZ9Z5oG8Bxz4qPE+HFwtVcfyw==",
+      "cpu": [
+        "arm"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/linux-arm64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-0.25.6.tgz",
+      "integrity": "sha512-b967hU0gqKd9Drsh/UuAm21Khpoh6mPBSgz8mKRq4P5mVK8bpA+hQzmm/ZwGVULSNBzKdZPQBRT3+WuVavcWsQ==",
+      "cpu": [
+        "arm64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/linux-ia32": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-0.25.6.tgz",
+      "integrity": "sha512-aHWdQ2AAltRkLPOsKdi3xv0mZ8fUGPdlKEjIEhxCPm5yKEThcUjHpWB1idN74lfXGnZ5SULQSgtr5Qos5B0bPw==",
+      "cpu": [
+        "ia32"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/linux-loong64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-loong64/-/linux-loong64-0.25.6.tgz",
+      "integrity": "sha512-VgKCsHdXRSQ7E1+QXGdRPlQ/e08bN6WMQb27/TMfV+vPjjTImuT9PmLXupRlC90S1JeNNW5lzkAEO/McKeJ2yg==",
+      "cpu": [
+        "loong64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/linux-mips64el": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-mips64el/-/linux-mips64el-0.25.6.tgz",
+      "integrity": "sha512-WViNlpivRKT9/py3kCmkHnn44GkGXVdXfdc4drNmRl15zVQ2+D2uFwdlGh6IuK5AAnGTo2qPB1Djppj+t78rzw==",
+      "cpu": [
+        "mips64el"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/linux-ppc64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-ppc64/-/linux-ppc64-0.25.6.tgz",
+      "integrity": "sha512-wyYKZ9NTdmAMb5730I38lBqVu6cKl4ZfYXIs31Baf8aoOtB4xSGi3THmDYt4BTFHk7/EcVixkOV2uZfwU3Q2Jw==",
+      "cpu": [
+        "ppc64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/linux-riscv64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-riscv64/-/linux-riscv64-0.25.6.tgz",
+      "integrity": "sha512-KZh7bAGGcrinEj4qzilJ4hqTY3Dg2U82c8bv+e1xqNqZCrCyc+TL9AUEn5WGKDzm3CfC5RODE/qc96OcbIe33w==",
+      "cpu": [
+        "riscv64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/linux-s390x": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-s390x/-/linux-s390x-0.25.6.tgz",
+      "integrity": "sha512-9N1LsTwAuE9oj6lHMyyAM+ucxGiVnEqUdp4v7IaMmrwb06ZTEVCIs3oPPplVsnjPfyjmxwHxHMF8b6vzUVAUGw==",
+      "cpu": [
+        "s390x"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/linux-x64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.25.6.tgz",
+      "integrity": "sha512-A6bJB41b4lKFWRKNrWoP2LHsjVzNiaurf7wyj/XtFNTsnPuxwEBWHLty+ZE0dWBKuSK1fvKgrKaNjBS7qbFKig==",
+      "cpu": [
+        "x64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "linux"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/netbsd-arm64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/netbsd-arm64/-/netbsd-arm64-0.25.6.tgz",
+      "integrity": "sha512-IjA+DcwoVpjEvyxZddDqBY+uJ2Snc6duLpjmkXm/v4xuS3H+3FkLZlDm9ZsAbF9rsfP3zeA0/ArNDORZgrxR/Q==",
+      "cpu": [
+        "arm64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "netbsd"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/netbsd-x64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/netbsd-x64/-/netbsd-x64-0.25.6.tgz",
+      "integrity": "sha512-dUXuZr5WenIDlMHdMkvDc1FAu4xdWixTCRgP7RQLBOkkGgwuuzaGSYcOpW4jFxzpzL1ejb8yF620UxAqnBrR9g==",
+      "cpu": [
+        "x64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "netbsd"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/openbsd-arm64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/openbsd-arm64/-/openbsd-arm64-0.25.6.tgz",
+      "integrity": "sha512-l8ZCvXP0tbTJ3iaqdNf3pjaOSd5ex/e6/omLIQCVBLmHTlfXW3zAxQ4fnDmPLOB1x9xrcSi/xtCWFwCZRIaEwg==",
+      "cpu": [
+        "arm64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "openbsd"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/openbsd-x64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/openbsd-x64/-/openbsd-x64-0.25.6.tgz",
+      "integrity": "sha512-hKrmDa0aOFOr71KQ/19JC7az1P0GWtCN1t2ahYAf4O007DHZt/dW8ym5+CUdJhQ/qkZmI1HAF8KkJbEFtCL7gw==",
+      "cpu": [
+        "x64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "openbsd"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/openharmony-arm64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/openharmony-arm64/-/openharmony-arm64-0.25.6.tgz",
+      "integrity": "sha512-+SqBcAWoB1fYKmpWoQP4pGtx+pUUC//RNYhFdbcSA16617cchuryuhOCRpPsjCblKukAckWsV+aQ3UKT/RMPcA==",
+      "cpu": [
+        "arm64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "openharmony"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/sunos-x64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/sunos-x64/-/sunos-x64-0.25.6.tgz",
+      "integrity": "sha512-dyCGxv1/Br7MiSC42qinGL8KkG4kX0pEsdb0+TKhmJZgCUDBGmyo1/ArCjNGiOLiIAgdbWgmWgib4HoCi5t7kA==",
+      "cpu": [
+        "x64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "sunos"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/win32-arm64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/win32-arm64/-/win32-arm64-0.25.6.tgz",
+      "integrity": "sha512-42QOgcZeZOvXfsCBJF5Afw73t4veOId//XD3i+/9gSkhSV6Gk3VPlWncctI+JcOyERv85FUo7RxuxGy+z8A43Q==",
+      "cpu": [
+        "arm64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "win32"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/win32-ia32": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-0.25.6.tgz",
+      "integrity": "sha512-4AWhgXmDuYN7rJI6ORB+uU9DHLq/erBbuMoAuB4VWJTu5KtCgcKYPynF0YI1VkBNuEfjNlLrFr9KZPJzrtLkrQ==",
+      "cpu": [
+        "ia32"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "win32"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/@esbuild/win32-x64": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.25.6.tgz",
+      "integrity": "sha512-NgJPHHbEpLQgDH2MjQu90pzW/5vvXIZ7KOnPyNBm92A6WgZ/7b6fJyUBjoumLqeOQQGqY2QjQxRo97ah4Sj0cA==",
+      "cpu": [
+        "x64"
+      ],
+      "dev": true,
+      "license": "MIT",
+      "optional": true,
+      "os": [
+        "win32"
+      ],
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/esbuild": {
+      "version": "0.25.6",
+      "resolved": "https://registry.npmjs.org/esbuild/-/esbuild-0.25.6.tgz",
+      "integrity": "sha512-GVuzuUwtdsghE3ocJ9Bs8PNoF13HNQ5TXbEi2AhvVb8xU1Iwt9Fos9FEamfoee+u/TOsn7GUWc04lz46n2bbTg==",
+      "dev": true,
+      "hasInstallScript": true,
+      "license": "MIT",
+      "bin": {
+        "esbuild": "bin/esbuild"
+      },
+      "engines": {
+        "node": ">=18"
+      },
+      "optionalDependencies": {
+        "@esbuild/aix-ppc64": "0.25.6",
+        "@esbuild/android-arm": "0.25.6",
+        "@esbuild/android-arm64": "0.25.6",
+        "@esbuild/android-x64": "0.25.6",
+        "@esbuild/darwin-arm64": "0.25.6",
+        "@esbuild/darwin-x64": "0.25.6",
+        "@esbuild/freebsd-arm64": "0.25.6",
+        "@esbuild/freebsd-x64": "0.25.6",
+        "@esbuild/linux-arm": "0.25.6",
+        "@esbuild/linux-arm64": "0.25.6",
+        "@esbuild/linux-ia32": "0.25.6",
+        "@esbuild/linux-loong64": "0.25.6",
+        "@esbuild/linux-mips64el": "0.25.6",
+        "@esbuild/linux-ppc64": "0.25.6",
+        "@esbuild/linux-riscv64": "0.25.6",
+        "@esbuild/linux-s390x": "0.25.6",
+        "@esbuild/linux-x64": "0.25.6",
+        "@esbuild/netbsd-arm64": "0.25.6",
+        "@esbuild/netbsd-x64": "0.25.6",
+        "@esbuild/openbsd-arm64": "0.25.6",
+        "@esbuild/openbsd-x64": "0.25.6",
+        "@esbuild/openharmony-arm64": "0.25.6",
+        "@esbuild/sunos-x64": "0.25.6",
+        "@esbuild/win32-arm64": "0.25.6",
+        "@esbuild/win32-ia32": "0.25.6",
+        "@esbuild/win32-x64": "0.25.6"
+      }
+    },
+    "node_modules/typescript": {
+      "version": "5.8.3",
+      "resolved": "https://registry.npmjs.org/typescript/-/typescript-5.8.3.tgz",
+      "integrity": "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==",
+      "dev": true,
+      "license": "Apache-2.0",
+      "bin": {
+        "tsc": "bin/tsc",
+        "tsserver": "bin/tsserver"
+      },
+      "engines": {
+        "node": ">=14.17"
+      }
+    }
+  }
+}
+--------------------------------------------------------------------------------
+
+FILE: project_snapshot.txt
+--------------------------------------------------------------------------------
+[ERROR: Unable to read project_snapshot.txt]
+--------------------------------------------------------------------------------
+
+FILE: public/api/data.php
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+FILE: public/assets/js/csv-grid.js
+--------------------------------------------------------------------------------
+"use strict";(()=>{var a=class extends HTMLElement{data=[];sortDirection=1;sortColumn=-1;constructor(){super();let r=this.attachShadow({mode:"open"});r.innerHTML=`
+      <style>
+        .grid-container {
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          max-width: 100%;
+          overflow-x: auto;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        th {
+          background: #f4f4f4;
+          padding: 8px;
+          cursor: pointer;
+          user-select: none;
+        }
+        th:hover {
+          background: #e0e0e0;
+        }
+        td {
+          padding: 8px;
+          border: 1px solid #ddd;
+        }
+        th.sort-indicator::after {
+          content: ' \u2195';
+        }
+        th.sort-ascending::after {
+          content: ' \u2191';
+        }
+        th.sort-descending::after {
+          content: ' \u2193';
+        }
+        .loading {
+          padding: 10px;
+          color: #555;
+        }
+        .error {
+          padding: 10px;
+          color: red;
+        }
+      </style>
+      <div class="grid-container">
+        <table>
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    `}static get observedAttributes(){return["data-src"]}attributeChangedCallback(r,e,t){r==="data-src"&&t&&this.loadCSV(t)}connectedCallback(){let r=this.getAttribute("data-src");r&&this.loadCSV(r),this.shadowRoot?.addEventListener("click",e=>{let t=e.target.closest("th");if(t){let o=Array.from(this.shadowRoot?.querySelectorAll("th")||[]).indexOf(t);this.sortTable(o)}}),this.shadowRoot?.addEventListener("keydown",e=>{let t=e.target.closest("th");if(t&&(e.key==="Enter"||e.key===" ")){e.preventDefault();let o=Array.from(this.shadowRoot?.querySelectorAll("th")||[]).indexOf(t);this.sortTable(o)}})}async loadCSV(r){try{let e=this.shadowRoot?.querySelector("tbody");e&&(e.innerHTML='<tr><td class="loading">Loading...</td></tr>');let t=await fetch(r);if(!t.ok)throw new Error(`Failed to fetch CSV: ${t.status}`);let o=await t.text();this.data=this.parseCSV(o),this.renderTable()}catch(e){let t=this.shadowRoot?.querySelector("tbody");t&&(t.innerHTML=`<tr><td class="error">Error: ${e.message}</td></tr>`)}}parseCSV(r){return r.trim().split(`
+`).map(e=>e.split(",").map(t=>t.trim()))}renderTable(){let r=this.data[0]??[],e=this.data.slice(1)??[],t=this.shadowRoot?.querySelector("thead"),o=this.shadowRoot?.querySelector("tbody");t&&o&&(t.innerHTML=`
+        <tr>
+          ${r.map((i,s)=>`<th class="${s===this.sortColumn?this.sortDirection>0?"sort-ascending":"sort-descending":"sort-indicator"}">${i}</th>`).join("")}
+        </tr>
+      `,o.innerHTML=`
+        ${e.map(i=>`
+          <tr>
+            ${i.map(s=>`<td>${s}</td>`).join("")}
+          </tr>
+        `).join("")}
+      `)}sortTable(r){this.sortColumn===r?this.sortDirection*=-1:this.sortDirection=1,this.sortColumn=r;let e=this.shadowRoot?.querySelector("tbody");if(!e)return;let t=Array.from(e.querySelectorAll("tr")),o=this.isColumnNumeric(r);t.sort((s,n)=>{let d=s.cells[r]?.textContent?.trim()??"",c=n.cells[r]?.textContent?.trim()??"";return o?(Number(d)-Number(c))*this.sortDirection:d.localeCompare(c)*this.sortDirection}),e.innerHTML="",t.forEach(s=>e.appendChild(s)),(this.shadowRoot?.querySelectorAll("th")||[]).forEach((s,n)=>{s.classList.remove("sort-indicator","sort-ascending","sort-descending"),n===r?(s.classList.add(this.sortDirection>0?"sort-ascending":"sort-descending"),s.setAttribute("aria-sort",this.sortDirection>0?"ascending":"descending")):(s.classList.add("sort-indicator"),s.setAttribute("aria-sort","none"))})}isColumnNumeric(r){let e=this.shadowRoot?.querySelectorAll("tbody tr");return Array.from(e||[]).every(t=>{let o=t.cells[r]?.textContent?.trim();return o!==void 0&&o!==""&&!isNaN(Number(o))})}};customElements.define("csv-grid",a);})();
+--------------------------------------------------------------------------------
+
+FILE: public/index.html
+--------------------------------------------------------------------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Grid Test</title>
+  <link rel="icon" href="/favicon.ico">
+</head>
+<body>
+  <h1>CSV Grid Component Test</h1>
+  <csv-grid data-src="data.csv"></csv-grid>
+  <script src="assets/js/csv-grid.js"></script>
+</body>
+</html>--------------------------------------------------------------------------------
+
+FILE: README.md
+--------------------------------------------------------------------------------
+CSV Grid Test Project
+A test project for a TypeScript-based Web Component (<csv-grid>) that loads and displays a CSV file as a sortable table, using esbuild for bundling and PHP's built-in server for serving. The component library is organized to support future expansion, with JavaScript output in public/assets/js/.
+Prerequisites
+
+Node.js (for esbuild and TypeScript)
+PHP (for php -S)
+npm (for installing dependencies)
+
+Setup
+
+Install dependencies:
+npm install
+
+
+Build the TypeScript code:
+npm run build
+
+This compiles src/components/csv-grid.ts to public/assets/js/csv-grid.js.
+
+Start the PHP server:
+npm run serve
+
+This runs php -S localhost:8000 -t public, serving files from the public/ directory.
+
+Development mode (optional):
+npm run watch
+
+This rebuilds the JavaScript on file changes for live development.
+
+Open the project:Visit http://localhost:8000 in your browser to see the CSV grid.
+
+
+Project Structure
+
+src/components/csv-grid.ts: TypeScript code for the <csv-grid> web component.
+public/assets/js/csv-grid.js: Compiled, minified JavaScript (production-ready).
+public/index.html: Test HTML page to demonstrate the component.
+public/data.csv: Sample CSV file.
+build.js: esbuild script to compile and bundle TypeScript.
+tsconfig.json: TypeScript configuration.
+package.json: Node.js configuration with scripts.
+
+Deployment to Production
+
+Run npm run build to generate public/assets/js/csv-grid.js.
+Copy the public/ directory (or specific files: assets/js/csv-grid.js, data.csv) to the production server’s web root (e.g., /var/www/html/ for Apache/Nginx or static/ for Django).
+Include in your production HTML:<table is="csv-grid" data-src="/data.csv"></table>
+<script src="/assets/js/csv-grid.js"></script>
+
+
+Ensure the server serves static files with correct MIME types (e.g., text/javascript for .js, text/csv for .csv).
+
+Usage
+The <table is="csv-grid" data-src="data.csv"></table> element loads and displays the CSV file specified in data-src. Click or press Enter/Space on column headers to sort the table.
+Expanding the Component Library
+
+Add new components to src/components/ (e.g., src/components/data-table.ts).
+Update build.js to include new entry points:entryPoints: [
+  { in: 'src/components/csv-grid.ts', out: 'csv-grid' },
+  { in: 'src/components/data-table.ts', out: 'data-table' }
+]
+
+
+For app-specific code, create src/app/app.ts and add to entryPoints (e.g., { in: 'src/app/app.ts', out: 'app' }).
+
+Notes
+
+The CSV parser is basic (splits on commas and newlines). For complex CSVs, consider adding Papa Parse via a CDN:<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+
+The public/ directory is self-contained and can be copied to a production server.
+The project is lightweight, using only TypeScript, esbuild, and native Web Components APIs.
+--------------------------------------------------------------------------------
+
+FILE: src/components/csv-grid.ts
+--------------------------------------------------------------------------------
+class CSVGrid extends HTMLElement {
+  private data: string[][] = [];
+  private sortDirection: number = 1;
+  private sortColumn: number = -1;
+
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    shadow.innerHTML = `
+      <style>
+        .grid-container {
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          max-width: 100%;
+          overflow-x: auto;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        th {
+          background: #f4f4f4;
+          padding: 8px;
+          cursor: pointer;
+          user-select: none;
+        }
+        th:hover {
+          background: #e0e0e0;
+        }
+        td {
+          padding: 8px;
+          border: 1px solid #ddd;
+        }
+        th.sort-indicator::after {
+          content: ' ↕';
+        }
+        th.sort-ascending::after {
+          content: ' ↑';
+        }
+        th.sort-descending::after {
+          content: ' ↓';
+        }
+        .loading {
+          padding: 10px;
+          color: #555;
+        }
+        .error {
+          padding: 10px;
+          color: red;
+        }
+      </style>
+      <div class="grid-container">
+        <table>
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  static get observedAttributes(): string[] {
+    return ['data-src'];
+  }
+
+  attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
+    if (name === 'data-src' && newValue) {
+      void this.loadCSV(newValue);
+    }
+  }
+
+  connectedCallback(): void {
+    const src = this.getAttribute('data-src');
+    if (src) {
+      void this.loadCSV(src);
+    }
+    this.shadowRoot?.addEventListener('click', (e: Event) => {
+      const th = (e.target as HTMLElement).closest('th');
+      if (th) {
+        const index = Array.from(this.shadowRoot?.querySelectorAll('th') || []).indexOf(th);
+        this.sortTable(index);
+      }
+    });
+    this.shadowRoot?.addEventListener('keydown', (e: KeyboardEvent) => {
+      const th = (e.target as HTMLElement).closest('th');
+      if (th && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        const index = Array.from(this.shadowRoot?.querySelectorAll('th') || []).indexOf(th);
+        this.sortTable(index);
+      }
+    });
+  }
+
+  private async loadCSV(url: string): Promise<void> {
+    try {
+      const tbody = this.shadowRoot?.querySelector('tbody');
+      if (tbody) {
+        tbody.innerHTML = '<tr><td class="loading">Loading...</td></tr>';
+      }
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const text = await response.text();
+      this.data = this.parseCSV(text);
+      this.renderTable();
+    } catch (error) {
+      console.error('Fetch error:', error);
+      const tbody = this.shadowRoot?.querySelector('tbody');
+      if (tbody) {
+        tbody.innerHTML = `<tr><td class="error">Error: ${(error as Error).message}</td></tr>`;
+      }
+    }
+  }
+
+  private parseCSV(csvText: string): string[][] {
+    return csvText
+      .trim()
+      .split('\n')
+      .map(row => row.split(',').map(cell => cell.trim()));
+  }
+
+  private renderTable(): void {
+    const headers = this.data[0] ?? [];
+    const body = this.data.slice(1) ?? [];
+    const thead = this.shadowRoot?.querySelector('thead');
+    const tbody = this.shadowRoot?.querySelector('tbody');
+    if (thead && tbody) {
+      thead.innerHTML = `
+        <tr>
+          ${headers.map((h, i) => `<th class="${i === this.sortColumn ? (this.sortDirection > 0 ? 'sort-ascending' : 'sort-descending') : 'sort-indicator'}">${h}</th>`).join('')}
+        </tr>
+      `;
+      tbody.innerHTML = `
+        ${body.map(row => `
+          <tr>
+            ${row.map(cell => `<td>${cell}</td>`).join('')}
+          </tr>
+        `).join('')}
+      `;
+    }
+  }
+
+  private sortTable(columnIndex: number): void {
+    if (this.sortColumn === columnIndex) {
+      this.sortDirection *= -1;
+    } else {
+      this.sortDirection = 1;
+    }
+    this.sortColumn = columnIndex;
+
+    const tbody = this.shadowRoot?.querySelector('tbody');
+    if (!tbody) return;
+
+    const rows = Array.from(tbody.querySelectorAll('tr')) as HTMLTableRowElement[];
+    const isNumeric = this.isColumnNumeric(columnIndex);
+
+    rows.sort((rowA, rowB) => {
+      const cellA = rowA.cells[columnIndex]?.textContent?.trim() ?? '';
+      const cellB = rowB.cells[columnIndex]?.textContent?.trim() ?? '';
+      if (isNumeric) {
+        return (Number(cellA) - Number(cellB)) * this.sortDirection;
+      }
+      return cellA.localeCompare(cellB) * this.sortDirection;
+    });
+
+    tbody.innerHTML = '';
+    rows.forEach(row => tbody.appendChild(row));
+
+    const ths = this.shadowRoot?.querySelectorAll('th') || [];
+    ths.forEach((th: HTMLTableCellElement, index: number) => {
+      th.classList.remove('sort-indicator', 'sort-ascending', 'sort-descending');
+      if (index === columnIndex) {
+        th.classList.add(this.sortDirection > 0 ? 'sort-ascending' : 'sort-descending');
+        th.setAttribute('aria-sort', this.sortDirection > 0 ? 'ascending' : 'descending');
+      } else {
+        th.classList.add('sort-indicator');
+        th.setAttribute('aria-sort', 'none');
+      }
+    });
+  }
+
+  private isColumnNumeric(columnIndex: number): boolean {
+    const rows = this.shadowRoot?.querySelectorAll('tbody tr') as NodeListOf<HTMLTableRowElement> | undefined;
+    return Array.from(rows || []).every(row => {
+      const cell = row.cells[columnIndex]?.textContent?.trim();
+      return cell !== undefined && cell !== '' && !isNaN(Number(cell));
+    });
+  }
+}
+
+customElements.define('csv-grid', CSVGrid);--------------------------------------------------------------------------------
+
+FILE: tsconfig.json
+--------------------------------------------------------------------------------
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "./public",
+    "rootDir": "./src",
+    "lib": ["DOM", "ESNext"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}--------------------------------------------------------------------------------
+
+================================================================================
+
+CONFIGURATION FILES
+--------------------------------------------------------------------------------
+
+FILE: package.json
+--------------------------------------------------------------------------------
+{
+  "name": "csv-grid-test",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node build.js",
+    "watch": "node build.js --watch",
+    "serve": "php -S localhost:8000 -t public"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.6",
+    "typescript": "^5.8.3"
+  }
+}--------------------------------------------------------------------------------
+
+FILE: tsconfig.json
+--------------------------------------------------------------------------------
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "./public",
+    "rootDir": "./src",
+    "lib": ["DOM", "ESNext"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}--------------------------------------------------------------------------------

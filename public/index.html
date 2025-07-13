@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Grid Test</title>
+  <link rel="icon" href="/favicon.ico">
+  <style>
+    body {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      background: #f0f4f8;
+      color: #2e3440;
+      margin: 0;
+      padding: 32px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: #2e3440;
+      margin-bottom: 24px;
+      text-align: center;
+      background: #ffffff;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      border: 1px solid #d8dee9;
+      max-width: 1200px;
+      width: 100%;
+    }
+    csv-grid {
+      max-width: 1200px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      padding: 16px;
+    }
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 8px;
+      }
+      h1 {
+        font-size: 24px;
+        padding: 12px 16px;
+      }
+      csv-grid {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>CSV Grid Component Test</h1>
+  <csv-grid data-src="api/data.php" rows-per-page="10"></csv-grid>
+  <script src="assets/js/csv-grid.js"></script>
+</body>
+</html>
