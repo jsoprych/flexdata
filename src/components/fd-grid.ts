@@ -1,9 +1,8 @@
+import { DataController } from '../data-controller.js';
+
 class FDGrid extends HTMLElement {
     private shadow: ShadowRoot;
-    private data: Record<string, string>[] = [];
-    private filteredData: Record<string, string>[] = [];
-    private sortColumn: string | null = null;
-    private sortDirection: 'asc' | 'desc' = 'asc';
+    private dataController: DataController;
     private currentPage: number = 1;
     private rowsPerPage: number = 10;
     private showJson: boolean = false;
@@ -11,6 +10,7 @@ class FDGrid extends HTMLElement {
     constructor() {
         super();
         this.shadow = this.attachShadow({ mode: 'open' });
+        this.dataController = DataController.getInstance();
         this.render();
     }
 
@@ -20,7 +20,7 @@ class FDGrid extends HTMLElement {
 
     attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
         if (name === 'data-src' && newValue && oldValue !== newValue) {
-            this.loadData(newValue);
+            this.dataController.loadData(newValue);
         }
         if (name === 'rows-per-page') {
             this.rowsPerPage = parseInt(newValue || '10', 10) || 10;
@@ -30,36 +30,34 @@ class FDGrid extends HTMLElement {
     }
 
     connectedCallback() {
+        this.dataController.on('data-updated', () => this.render());
+        this.dataController.on('error', (error) => this.handleError(error));
         const dataSrc = this.getAttribute('data-src');
         if (dataSrc) {
-            this.loadData(dataSrc);
+            this.dataController.loadData(dataSrc);
         }
     }
 
-    private async loadData(url: string) {
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            this.data = await response.json();
-            this.filteredData = [...this.data];
-            this.render();
-        } catch (error) {
-            console.error('Fetch error:', error);
-            this.shadow.innerHTML = `
-                <style>
-                    .error { color: var(--text-error, #d32f2f); font-family: var(--font-family, 'Helvetica', 'Arial', sans-serif); }
-                </style>
-                <div class="error">Error loading data: ${error.message}</div>
-            `;
-        }
+    disconnectedCallback() {
+        this.dataController.off('data-updated', () => this.render());
+        this.dataController.off('error', (error) => this.handleError(error));
+    }
+
+    private handleError(error: { message: string }) {
+        this.shadow.innerHTML = `
+            <style>
+                .error { color: var(--text-error, #d32f2f); font-family: var(--font-family, 'Helvetica', 'Arial', sans-serif); }
+            </style>
+            <div class="error">${error.message}</div>
+        `;
     }
 
     private render() {
-        const headers = this.data.length > 0 ? Object.keys(this.data[0]) : [];
+        const headers = this.dataController.getFilteredData().length > 0 ? Object.keys(this.dataController.getFilteredData()[0]) : [];
         const start = (this.currentPage - 1) * this.rowsPerPage;
         const end = start + this.rowsPerPage;
-        const paginatedData = this.filteredData.slice(start, end);
-        const totalPages = Math.ceil(this.filteredData.length / this.rowsPerPage);
+        const paginatedData = this.dataController.getFilteredData().slice(start, end);
+        const totalPages = Math.ceil(this.dataController.getFilteredData().length / this.rowsPerPage);
 
         this.shadow.innerHTML = `
             <style>
@@ -184,9 +182,9 @@ class FDGrid extends HTMLElement {
                     <thead>
                         <tr>
                             ${headers.map(header => `
-                                <th aria-sort="${this.sortColumn === header ? this.sortDirection : 'none'}">
+                                <th aria-sort="${this.dataController.getSortColumn() === header ? this.dataController.getSortDirection() : 'none'}">
                                     ${header.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                                    ${this.sortColumn === header ? (this.sortDirection === 'asc' ? '↑' : '↓') : ''}
+                                    ${this.dataController.getSortColumn() === header ? (this.dataController.getSortDirection() === 'asc' ? '↑' : '↓') : ''}
                                 </th>
                             `).join('')}
                         </tr>
@@ -204,19 +202,16 @@ class FDGrid extends HTMLElement {
                     <span>Page ${this.currentPage} of ${totalPages}</span>
                     <button ${this.currentPage === totalPages ? 'disabled' : ''}>Next</button>
                 </div>
-                ${this.showJson && this.data.length > 0 ? `
-                    <pre class="json-view">${JSON.stringify(this.data, null, 2)}</pre>
+                ${this.showJson && this.dataController.getFilteredData().length > 0 ? `
+                    <pre class="json-view">${JSON.stringify(this.dataController.getFilteredData(), null, 2)}</pre>
                 ` : ''}
             </div>
         `;
 
         this.shadow.querySelector('input')?.addEventListener('input', (e) => {
-            const filter = (e.target as HTMLInputElement).value.toLowerCase();
-            this.filteredData = this.data.filter(row =>
-                headers.some(header => (row[header] || '').toLowerCase().includes(filter))
-            );
+            const filter = (e.target as HTMLInputElement).value;
+            this.dataController.setFilter(filter);
             this.currentPage = 1;
-            this.render();
         });
 
         this.shadow.querySelector('select')?.addEventListener('change', (e) => {
@@ -228,31 +223,10 @@ class FDGrid extends HTMLElement {
         this.shadow.querySelectorAll('th').forEach((th, index) => {
             th.addEventListener('click', () => {
                 const header = headers[index];
-                if (this.sortColumn === header) {
-                    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-                } else {
-                    this.sortColumn = header;
-                    this.sortDirection = 'asc';
-                }
-                this.filteredData.sort((a, b) => {
-                    const aValue = a[header] ?? '';
-                    const bValue = b[header] ?? '';
-                    const numericColumns = ['customer_id', 'tax_id'];
-                    const isNumericColumn = numericColumns.includes(header);
-                    const aIsNumber = !isNaN(parseFloat(aValue)) && isFinite(parseFloat(aValue));
-                    const bIsNumber = !isNaN(parseFloat(bValue)) && isFinite(parseFloat(bValue));
-                    if (isNumericColumn && aIsNumber && bIsNumber) {
-                        return this.sortDirection === 'asc'
-                            ? parseFloat(aValue) - parseFloat(bValue)
-                            : parseFloat(bValue) - parseFloat(aValue);
-                    }
-                    const aStr = aValue.toString().toLowerCase();
-                    const bStr = bValue.toString().toLowerCase();
-                    return this.sortDirection === 'asc'
-                        ? aStr.localeCompare(bStr)
-                        : bStr.localeCompare(aStr);
-                });
-                this.render();
+                const currentSortColumn = this.dataController.getSortColumn();
+                const currentSortDirection = this.dataController.getSortDirection();
+                const newDirection = currentSortColumn === header && currentSortDirection === 'asc' ? 'desc' : 'asc';
+                this.dataController.setSort(header, newDirection);
             });
         });
 
@@ -271,7 +245,7 @@ class FDGrid extends HTMLElement {
             row.addEventListener('click', () => {
                 const rowIndex = Array.from(this.shadow.querySelectorAll('tr.selectable')).indexOf(row);
                 const rowData = paginatedData[rowIndex];
-                window.dispatchEvent(new CustomEvent('row-selected', { detail: rowData }));
+                this.dataController.setSelectedRow(rowData);
             });
         });
 

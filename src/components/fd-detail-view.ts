@@ -1,24 +1,22 @@
+import { DataController } from '../data-controller.js';
+
 class FDDetailView extends HTMLElement {
     private shadow: ShadowRoot;
+    private dataController: DataController;
 
     constructor() {
         super();
         this.shadow = this.attachShadow({ mode: 'open' });
+        this.dataController = DataController.getInstance();
         this.render();
     }
 
     connectedCallback() {
-        window.addEventListener('row-selected', this.handleRowSelected.bind(this));
+        this.dataController.on('row-selected', (rowData) => this.render(rowData));
     }
 
     disconnectedCallback() {
-        window.removeEventListener('row-selected', this.handleRowSelected.bind(this));
-    }
-
-    private handleRowSelected(event: Event) {
-        const customEvent = event as CustomEvent;
-        const rowData = customEvent.detail;
-        this.render(rowData);
+        this.dataController.off('row-selected', (rowData) => this.render(rowData));
     }
 
     private render(data: Record<string, string> | null = null) {
@@ -97,7 +95,6 @@ class FDDetailView extends HTMLElement {
                     background: var(--bg-primary, #ffffff);
                     color: var(--text-button, #81a1c1);
                     cursor: pointer;
-                    font-family: var(--font-family, 'Helvetica', 'Arial', sans-serif);
                 }
                 .save-button:hover {
                     background: var(--bg-header-hover, #c8d7e8);

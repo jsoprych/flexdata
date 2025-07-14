@@ -1,7 +1,7 @@
 const esbuild = require('esbuild');
 
 esbuild.build({
-    entryPoints: ['src/components/fd-grid.ts', 'src/components/fd-detail-view.ts'],
+    entryPoints: ['src/components/fd-grid.ts', 'src/components/fd-detail-view.ts', 'src/data-controller.ts'],
     outdir: 'public/assets/js',
     bundle: true,
     minify: true,

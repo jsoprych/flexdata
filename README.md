@@ -1,5 +1,5 @@
 FlexData
-FlexData is a lightweight, modular TypeScript-based Web Component library for displaying JSON data in a sortable, paginated, and filterable grid (<fd-grid>) with a detail view (<fd-detail-view>). Built with esbuild for bundling and served via PHP's built-in server, it uses Shadow DOM for style encapsulation and a modern, customizable design with a default Helvetica-based theme, fully configurable via CSS custom properties.
+FlexData is a lightweight, modular TypeScript-based Web Component library for displaying JSON data in a sortable, paginated, and filterable grid (<fd-grid>) with a detail view (<fd-detail-view>). Built with esbuild for bundling and served via PHP's built-in server, it uses Shadow DOM for style encapsulation and a modern, customizable design with a default Helvetica-based theme, fully configurable via CSS custom properties. A centralized DataController manages data state and events for components.
 Prerequisites
 
 Node.js (for esbuild and TypeScript)
@@ -16,7 +16,7 @@ npm install
 Build the TypeScript code:
 npm run build
 
-This compiles src/components/fd-grid.ts and src/components/fd-detail-view.ts to public/assets/js/fd-grid.js and public/assets/js/fd-detail-view.js.
+This compiles src/components/fd-grid.ts, src/components/fd-detail-view.ts, and src/data-controller.ts to public/assets/js/fd-grid.js, public/assets/js/fd-detail-view.js, and public/assets/js/data-controller.js.
 
 Start the PHP server:
 npm run serve
@@ -33,8 +33,10 @@ Open the project:Visit http://localhost:8000 to see the FlexData grid and detail
 
 Project Structure
 
+src/data-controller.ts: Centralized state manager for data, filtering, sorting, and row selection.
 src/components/fd-grid.ts: Sortable, paginated, filterable grid component for JSON data.
 src/components/fd-detail-view.ts: Detail view component for selected row data.
+public/assets/js/data-controller.js: Compiled, minified JavaScript for state management.
 public/assets/js/fd-grid.js: Compiled, minified JavaScript for grid.
 public/assets/js/fd-detail-view.js: Compiled, minified JavaScript for detail view.
 public/index.html: Test HTML page with customizable styling.
@@ -48,8 +50,8 @@ package.json: Node.js configuration with scripts.
 
 Deployment to Production
 
-Run npm run build to generate public/assets/js/fd-grid.js and public/assets/js/fd-detail-view.js.
-Copy the public/ directory (or specific files: assets/js/fd-grid.js, assets/js/fd-detail-view.js, api/data.php, data/customer.db, data/data.csv, index.html) to the production server’s web root (e.g., /var/www/html/ for Apache/Nginx).
+Run npm run build to generate public/assets/js/data-controller.js, public/assets/js/fd-grid.js, and public/assets/js/fd-detail-view.js.
+Copy the public/ directory (or specific files: assets/js/data-controller.js, assets/js/fd-grid.js, assets/js/fd-detail-view.js, api/data.php, data/customer.db, data/data.csv, index.html) to the production server’s web root (e.g., /var/www/html/ for Apache/Nginx).
 Include in your production HTML:<html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -114,6 +116,7 @@ Include in your production HTML:<html lang="en">
   <h1>Your Data Grid</h1>
   <fd-grid data-src="/api/data.php" rows-per-page="10"></fd-grid>
   <fd-detail-view></fd-detail-view>
+  <script src="/assets/js/data-controller.js"></script>
   <script src="/assets/js/fd-grid.js"></script>
   <script src="/assets/js/fd-detail-view.js"></script>
 </body>
@@ -132,11 +135,13 @@ SQLite (default): /api/data.php or /api/data.php?source=sqlite.
 CSV: /api/data.php?source=csv.
 
 
+DataController: Centralized state manager handling data fetching, filtering, sorting, and row selection. Components subscribe to data-updated and row-selected events.
 Features:
-Sorting: Click or press Enter/Space on column headers to sort (numeric or alphabetic).
+Sorting: Click or press Enter/Space on column headers to sort (numeric for customer_id, tax_id; alphabetic for others).
 Pagination: Navigate with Previous/Next or select rows per page (5, 10, 20, 50).
 Filtering: Search via an input field (case-insensitive, any column).
 Row Selection: Click a row to display its details in <fd-detail-view>.
+JSON Debugging: Toggle JSON display in <fd-grid> to view raw data.
 Interactivity: <fd-detail-view> includes collapsible sections (e.g., Personal Info, Account Info) and a placeholder Save button for future editing.
 Styling: Customizable via CSS variables (default: Helvetica, light theme). Override in :root or :host.
 Accessibility: ARIA attributes (role="grid", aria-sort for <fd-grid>, role="list" for <fd-detail-view>).
@@ -178,8 +183,8 @@ Verify PHP is installed (php -v).
 
 Detail View Not Updating:
 Ensure <fd-detail-view> is included in index.html and src/components/fd-detail-view.ts is compiled.
-Check console for errors in fd-grid.js or fd-detail-view.js.
-Verify row-selected event is firing (e.g., add console.log in <fd-detail-view>’s handleRowSelected).
+Check console for errors in data-controller.js, fd-grid.js, or fd-detail-view.js.
+Verify DataController is firing row-selected events (e.g., add console.log in setSelectedRow).
 
 
 
@@ -188,4 +193,4 @@ Notes
 The data source (api/data.php) queries public/data/customer.db (SQLite, default) or public/data/data.csv (CSV, with ?source=csv) and serves JSON data.
 Components use Shadow DOM for style encapsulation; page styling is in index.html.
 The public/ directory and public/data/ are self-contained for production.
-The project is lightweight, using only TypeScript, esbuild, PHP, and native Web Components APIs.
+The project is lightweight, using only TypeScript, esbuild, PHP, and native Web Components APIs with a DataController for state management.
