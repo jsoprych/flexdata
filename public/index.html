@@ -1,61 +1,68 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSV Grid Test</title>
-  <link rel="icon" href="/favicon.ico">
-  <style>
-    body {
-      font-family: 'Helvetica', 'Arial', sans-serif;
-      background: #f0f4f8;
-      color: #2e3440;
-      margin: 0;
-      padding: 32px 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-    h1 {
-      font-size: 28px;
-      font-weight: 600;
-      color: #2e3440;
-      margin-bottom: 24px;
-      text-align: center;
-      background: #ffffff;
-      padding: 16px 24px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      border: 1px solid #d8dee9;
-      max-width: 1200px;
-      width: 100%;
-    }
-    csv-grid {
-      max-width: 1200px;
-      width: 100%;
-      background: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      padding: 16px;
-    }
-    @media (max-width: 768px) {
-      body {
-        padding: 16px 8px;
-      }
-      h1 {
-        font-size: 24px;
-        padding: 12px 16px;
-      }
-      csv-grid {
-        padding: 8px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexData</title>
+    <style>
+        :root {
+            --font-family: 'Helvetica', 'Arial', sans-serif;
+            --bg-body: #f0f4f8;
+            --bg-primary: #ffffff;
+            --bg-row-even: #e6f0fa;
+            --bg-header: #d9e6f2;
+            --bg-header-hover: #c8d7e8;
+            --bg-cell-bubble: #f0f4f8;
+            --text-primary: #2e3440;
+            --text-secondary: #5e81ac;
+            --text-button: #81a1c1;
+            --text-disabled: #a3be8c;
+            --text-error: #d32f2f;
+            --border-color: #d8dee9;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --border-radius: 8px;
+            --padding: 16px;
+            --padding-mobile: 8px;
+            --font-size-header: 28px;
+            --font-size-header-mobile: 24px;
+            --font-size-cell: 14px;
+            --font-size-cell-mobile: 13px;
+        }
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-body);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 32px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 {
+            font-size: var(--font-size-header);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            text-align: center;
+            background: var(--bg-primary);
+            padding: 16px 24px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            max-width: 1200px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            body { padding: var(--padding-mobile); }
+            h1 { font-size: var(--font-size-header-mobile); padding: var(--padding-mobile); }
+        }
+    </style>
 </head>
 <body>
-  <h1>CSV Grid Component Test</h1>
-  <csv-grid data-src="api/data.php" rows-per-page="10"></csv-grid>
-  <script src="assets/js/csv-grid.js"></script>
+    <h1>FlexData Grid</h1>
+    <fd-grid data-src="/api/data.php" rows-per-page="10"></fd-grid>
+    <fd-detail-view></fd-detail-view>
+    <script src="/assets/js/fd-grid.js"></script>
+    <script src="/assets/js/fd-detail-view.js"></script>
 </body>
 </html>
