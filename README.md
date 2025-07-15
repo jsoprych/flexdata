@@ -1,4 +1,44 @@
-FlexData
+
+# FlexData Project
+
+## Overview
+FlexData provides a modular suite of custom Web Components designed for flexible data visualization and interaction.
+
+## Recent Updates (2025-07-15)
+- **Directory Reorganization:**
+  - New default landing page (`index.html`) with links to legacy and new component testing pages.
+  - Legacy index page renamed to `old_index.html`.
+  - New components testing page added: `new_controls.html`.
+
+- **CSS Organization:**
+  - Extracted inline CSS into an external stylesheet located at `public/assets/css/styles.css`.
+
+## Project Structure
+public/
+├── assets/
+│ ├── css/
+│ │ └── styles.css (New CSS location)
+│ └── js/
+│ ├── components/ (legacy components)
+│ └── core/components/ (new core components)
+├── index.html (New landing page)
+├── old_index.html (Legacy landing page)
+└── new_controls.html (Test page for new components)
+
+arduino
+Copy
+Edit
+
+## Development Commands
+```bash
+npm install
+npm run build      # builds the components
+npm run serve      # serves public directory locally at http://localhost:8000
+sql
+Copy
+Edit
+
+old -------------------------------------------------------------
 FlexData is a lightweight, modular TypeScript-based Web Component library for displaying JSON data in a sortable, paginated, and filterable grid (<fd-grid>) with a detail view (<fd-detail-view>). Built with esbuild for bundling and served via PHP's built-in server, it uses Shadow DOM for style encapsulation and a modern, customizable design with a default Helvetica-based theme, fully configurable via CSS custom properties. A centralized DataController manages data state and events for components.
 Prerequisites
 

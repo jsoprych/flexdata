@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/components/fd-status-bar.ts"],
+  "sourcesContent": ["// src/components/fd-status-bar.ts\nexport class FDStatusBar extends BaseControl {\n  constructor() {\n    super();\n    this.renderSlot().innerHTML = '<p>Status: Ready</p>';\n  }\n}\ncustomElements.define('fd-status-bar', FDStatusBar);"],
+  "mappings": ";;;AACO,MAAM,cAAN,cAA0B,YAAY;AAAA,IAC3C,cAAc;AACZ,YAAM;AACN,WAAK,WAAW,EAAE,YAAY;AAAA,IAChC;AAAA,EACF;AACA,iBAAe,OAAO,iBAAiB,WAAW;",
+  "names": []
+}

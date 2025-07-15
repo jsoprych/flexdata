@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New FlexData Controls</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script type="module" src="assets/js/core/components/FDGrid.js"></script>
+  <script type="module" src="assets/js/core/components/FDDetailView.js"></script>
+  <script type="module" src="assets/js/core/components/FDStatusBar.js"></script>
+</head>
+<body>
+  <h1>New FlexData Controls Testing</h1>
+
+  <fd-status-bar status-text="Status: Ready"></fd-status-bar>
+
+  <fd-grid rows-per-page="10">
+    <span slot="default">Custom content for FDGrid component.</span>
+  </fd-grid>
+
+  <fd-detail-view>
+    <span slot="header">Custom Header</span>
+    <span slot="body">Custom Body Content</span>
+  </fd-detail-view>
+
+</body>
+</html>

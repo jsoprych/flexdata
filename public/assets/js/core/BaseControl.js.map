@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/core/BaseControl.ts"],
+  "sourcesContent": ["// src/core/BaseControl.ts\nexport abstract class BaseControl extends HTMLElement {\n  protected shadow: ShadowRoot;\n\n  constructor() {\n    super();\n    this.shadow = this.attachShadow({ mode: 'open' });\n  }\n\n  connectedCallback() {\n    this.render();\n    this.attachEventListeners();\n  }\n\n  disconnectedCallback() {\n    this.detachEventListeners();\n  }\n\n  protected abstract render(): void;\n\n  protected attachEventListeners(): void {}\n  protected detachEventListeners(): void {}\n}\n"],
+  "mappings": "uLACO,IAAeA,EAAf,cAAmC,WAAY,CAGpD,aAAc,CACZ,MAAM,EAHRC,EAAA,KAAU,UAIR,KAAK,OAAS,KAAK,aAAa,CAAE,KAAM,MAAO,CAAC,CAClD,CAEA,mBAAoB,CAClB,KAAK,OAAO,EACZ,KAAK,qBAAqB,CAC5B,CAEA,sBAAuB,CACrB,KAAK,qBAAqB,CAC5B,CAIU,sBAA6B,CAAC,CAC9B,sBAA6B,CAAC,CAC1C",
+  "names": ["BaseControl", "__publicField"]
+}

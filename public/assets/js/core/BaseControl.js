@@ -1,0 +1,2 @@
+"use strict";(()=>{var d=Object.defineProperty;var o=(e,t,s)=>t in e?d(e,t,{enumerable:!0,configurable:!0,writable:!0,value:s}):e[t]=s;var a=(e,t,s)=>o(e,typeof t!="symbol"?t+"":t,s);var c=class extends HTMLElement{constructor(){super();a(this,"shadow");this.shadow=this.attachShadow({mode:"open"})}connectedCallback(){this.render(),this.attachEventListeners()}disconnectedCallback(){this.detachEventListeners()}attachEventListeners(){}detachEventListeners(){}};})();
+//# sourceMappingURL=BaseControl.js.map

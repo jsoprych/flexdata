@@ -1,0 +1,25 @@
+:root {
+  --bg-primary: #ffffff;
+  --border-radius: 8px;
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --padding: 16px;
+  --text-primary: #2e3440;
+  --text-secondary: #5e81ac;
+  --bg-header: #d9e6f2;
+  --bg-header-hover: #c8d7e8;
+  --border-color: #d8dee9;
+  --text-button: #81a1c1;
+}
+body {
+  font-family: 'Helvetica', 'Arial', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  margin: 20px;
+}
+a {
+  color: var(--text-button);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
